@@ -123,3 +123,30 @@ npm run retry
 New folders added to `~/.reddit/pending/` are automatically scheduled.
 
 After the post is made, its folder will be moved to `~/.reddit/done/`.
+
+### Running at startup
+
+It may be useful to run this script at startup.
+
+#### Windows
+
+[Create a task in Task Scheduler](https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10)
+to run at log in with `npm` as the program and `start prefix=/path/to/reddit-scheduler` where `/path/to/reddit-scheduler`
+is the path to the project root as the arguments.
+
+#### macOS
+
+Go to `System Settings > General > Login Items`, and add the `run.sh` script to `Open at Login`.
+
+#### Linux
+
+Create the file `~/.config/autostart/reddit-scheduler.desktop` with this content (remember to change the `Exec` path):
+
+```
+[Desktop Entry]
+Type=Application
+Name=reddit-scheduler
+Exec=npm start prefix=/path/to/reddit-scheduler
+StartupNotify=false
+Terminal=false
+```
