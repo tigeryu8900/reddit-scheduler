@@ -55,7 +55,7 @@
       "minItems": 2
     },
     "thumbnail": {
-      "description": "A number from 1 to 10 inclusive indicating the thumbnail to choose. Defaults to first image.",
+      "description": "An integer from 1 to 10 inclusive indicating the thumbnail to choose. Defaults to first image.",
       "type": "integer",
       "minimum": 1,
       "maximum": 10

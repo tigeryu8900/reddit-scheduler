@@ -94,11 +94,11 @@ For gallery posts, the `.type` field should be `gallery` or `images`. Additional
 
 For video posts, the `.type` field should be `video`. Additionally, there are these fields:
 
-| fields            | description                                                                                  |
-|-------------------|----------------------------------------------------------------------------------------------|
-| `.file`           | The path to the file of the video relative to the JSON file.                                 |
-| `.thumbnail`      | A number from 1 to 10 inclusive indicating the thumbnail to choose. Defaults to first image. |
-| `.gif`            | Whether or not to convert video to GIF. Defaults to `false`.                                 |
+| fields            | description                                                                                    |
+|-------------------|------------------------------------------------------------------------------------------------|
+| `.file`           | The path to the file of the video relative to the JSON file.                                   |
+| `.thumbnail`      | An integer from 1 to 10 inclusive indicating the thumbnail to choose. Defaults to first image. |
+| `.gif`            | Whether or not to convert video to GIF. Defaults to `false`.                                   |
 
 ### Link posts
 
