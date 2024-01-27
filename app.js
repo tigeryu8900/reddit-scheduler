@@ -164,7 +164,13 @@ function schedule(browser, dir, retry = false) {
 
 async function scheduleAll(browser, retry = false) {
     for (let dir of await fs.readdir(pendingDir)) {
-        schedule(browser, dir, retry);
+        try {
+            if (!dir.startsWith(".")) {
+                schedule(browser, dir, retry);
+            }
+        } catch (e) {
+            console.error(dir, e);
+        }
     }
 }
 
@@ -193,16 +199,22 @@ async function scheduleAll(browser, retry = false) {
     await page.close();
     await scheduleAll(browser);
     for await (let event of fs.watch(pendingDir)) {
-        const filepath = path.join(pendingDir, event.filename);
-        if (event.filename === "retry") {
-            if (await new Promise(resolve => fs.access(filepath)
-                .then(() => resolve(true), () => resolve(false)))) {
-                console.log("Retrying");
-                await fs.rm(filepath).catch(() => fs.rmdir(filepath));
-                await scheduleAll(browser, true);
+        try {
+            if (!event.filename.startsWith(".")) {
+                const filepath = path.join(pendingDir, event.filename);
+                if (event.filename === "retry") {
+                    if (await new Promise(resolve => fs.access(filepath)
+                        .then(() => resolve(true), () => resolve(false)))) {
+                        console.log("Retrying");
+                        await fs.rm(filepath).catch(() => fs.rmdir(filepath));
+                        await scheduleAll(browser, true);
+                    }
+                } else {
+                    schedule(browser, event.filename);
+                }
             }
-        } else {
-            schedule(browser, event.filename);
+        } catch (e) {
+            console.error(event.filename, e);
         }
     }
 })();
