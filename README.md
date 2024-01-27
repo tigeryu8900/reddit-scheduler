@@ -108,13 +108,16 @@ For link posts, the `.type` field should be `link` or `url`. Additionally, there
 ## Running
 
 ```shell
-# To run in the foreground, use this
+# To run in the foreground, run this
 npm run start:fg
 
-# To run in the background, use this
+# To run in the background, run this
 npm run start:bg
 # or this
 npm start
+
+# To redo all tasks in ~/.reddit/pending/ in case if some posts failed, run this
+npm run retry
 ```
 
 New folders added to `~/.reddit/pending/` are automatically scheduled.

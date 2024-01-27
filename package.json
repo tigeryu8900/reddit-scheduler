@@ -11,7 +11,8 @@
   "scripts": {
     "start": "npm run start:bg",
     "start:fg": "node app.js",
-    "start:bg": "nohup node app.js &"
+    "start:bg": "nohup node app.js &",
+    "retry": "touch ~/.reddit/pending/retry"
   },
   "keywords": [],
   "author": "tigeryu8900",
