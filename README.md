@@ -85,7 +85,7 @@ For gallery posts, the `.type` field should be `gallery` or `images`. Additional
 | `.images`            | An array specifying the file, caption, and link for each image.          |
 | `.images[i].file`    | The path to the file of the image post relative to the JSON file.        |
 | `.images[i].caption` | The caption of the image or `null` for no caption. Defaults to no image. |
-| `.images[i].link`    | The link of the image. Defaults to no image.                             |
+| `.images[i].link`    | The link of the image or `null` for no link. Defaults to no link.        |
 
 ### Video posts
 
