@@ -1,0 +1,23 @@
+{
+  "name": "reddit-scheduler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tigeryu8900/reddit-scheduler.git"
+  },
+  "scripts": {
+    "start": "npm run start:bg",
+    "start:fg": "node app.js",
+    "start:bg": "nohup node app.js &"
+  },
+  "keywords": [],
+  "author": "tigeryu8900",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.1",
+    "puppeteer": "^21.9.0"
+  }
+}
