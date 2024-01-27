@@ -6,6 +6,7 @@ import * as path from "path";
 import os from "os";
 
 const ctxDir = path.join(os.homedir(), ".reddit");
+const pidDir = path.join(ctxDir, "pid");
 const userDataDir = path.join(ctxDir, "User Data");
 const pendingDir = path.join(ctxDir, "pending");
 const failedDir = path.join(ctxDir, "failed");
@@ -176,7 +177,20 @@ async function scheduleAll(browser, retry = false) {
     }
 }
 
+async function exit(signal) {
+    console.log(signal, "received, quitting");
+    await this.close();
+    await fs.rm(pidDir);
+    process.exit();
+}
+
 (async () => {
+    await fs.mkdir(ctxDir, {recursive: true}).catch(() => {});
+    await fs.access(pidDir).then(async () => {
+        console.log("Another instance is running, stopping that instance");
+        process.kill(parseInt((await fs.readFile(pidDir)).toString()));
+    }, () => {});
+    await fs.writeFile(pidDir, process.pid.toString());
     console.log("Starting", Date());
     await fs.mkdir(userDataDir, {recursive: true}).catch(() => {});
     await fs.mkdir(pendingDir, {recursive: true}).catch(() => {});
@@ -185,6 +199,9 @@ async function scheduleAll(browser, retry = false) {
         headless: "new",
         userDataDir
     });
+    for (let signal of ["SIGHUP", "SIGINT", "SIGTERM"]) {
+        process.once(signal, exit.bind(browser));
+    }
     const page = await browser.newPage();
     await page.setUserAgent((await browser.userAgent()).replace(/headless/gi, ""));
     console.log("Signing in");

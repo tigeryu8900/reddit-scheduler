@@ -116,9 +116,14 @@ npm run start:bg
 # or this
 npm start
 
+# To stop the script, run this
+npm stop
+
 # To reschedule all tasks in ~/.reddit/pending/, run this
 npm run reschedule
 ```
+
+If an instance is already running, that instance will be stopped.
 
 New folders added to `~/.reddit/pending/` are automatically scheduled.
 

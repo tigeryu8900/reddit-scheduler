@@ -12,6 +12,10 @@
     "start": "npm run start:bg",
     "start:fg": "node app.js",
     "start:bg": "nohup node app.js &",
+    "stop": "kill $(cat ~/.reddit/pid)",
+    "restart": "npm start",
+    "restart:fg": "npm start:fg",
+    "restart:bg": "npm start:bg",
     "reschedule": "touch ~/.reddit/pending/reschedule"
   },
   "keywords": [],
