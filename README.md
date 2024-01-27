@@ -122,7 +122,8 @@ npm run reschedule
 
 New folders added to `~/.reddit/pending/` are automatically scheduled.
 
-After the post is made, its folder will be moved to `~/.reddit/done/`.
+After the post is made, its folder will be moved to `~/.reddit/done/`, or if it failed, its folder will be moved to
+`~/.reddit/failed/`.
 
 ### Running at startup
 

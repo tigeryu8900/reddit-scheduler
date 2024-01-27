@@ -8,6 +8,7 @@ import os from "os";
 const ctxDir = path.join(os.homedir(), ".reddit");
 const userDataDir = path.join(ctxDir, "User Data");
 const pendingDir = path.join(ctxDir, "pending");
+const failedDir = path.join(ctxDir, "failed");
 const doneDir = path.join(ctxDir, "done");
 const scheduled = {};
 const running = new Set();
@@ -141,6 +142,7 @@ async function post(browser, dir) {
         await fs.rename(path.join(pendingDir, dir), path.join(doneDir, dir));
         console.log(dir, "Posted", page.url(), data);
     } catch (e) {
+        await fs.rename(path.join(pendingDir, dir), path.join(failedDir, dir));
         console.error(dir, "Error", data, e);
     } finally {
         await page.close();
