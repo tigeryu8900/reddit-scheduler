@@ -202,10 +202,10 @@ async function scheduleAll(browser, retry = false) {
         try {
             if (!event.filename.startsWith(".")) {
                 const filepath = path.join(pendingDir, event.filename);
-                if (event.filename === "retry") {
+                if (event.filename === "reschedule") {
                     if (await new Promise(resolve => fs.access(filepath)
                         .then(() => resolve(true), () => resolve(false)))) {
-                        console.log("Retrying");
+                        console.log("Rescheduling");
                         await fs.rm(filepath).catch(() => fs.rmdir(filepath));
                         await scheduleAll(browser, true);
                     }

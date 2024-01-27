@@ -116,8 +116,8 @@ npm run start:bg
 # or this
 npm start
 
-# To redo all tasks in ~/.reddit/pending/ in case if some posts failed, run this
-npm run retry
+# To reschedule all tasks in ~/.reddit/pending/, run this
+npm run reschedule
 ```
 
 New folders added to `~/.reddit/pending/` are automatically scheduled.
