@@ -194,6 +194,7 @@ async function exit(signal) {
   console.log("Starting", Date());
   await fs.mkdir(userDataDir, {recursive: true}).catch(() => {});
   await fs.mkdir(pendingDir, {recursive: true}).catch(() => {});
+  await fs.mkdir(failedDir, {recursive: true}).catch(() => {});
   await fs.mkdir(doneDir, {recursive: true}).catch(() => {});
   const browser = await puppeteer.launch({
     headless: "new",
