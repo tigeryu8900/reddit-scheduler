@@ -30,6 +30,9 @@ Create a JSON file at `~/.reddit/pending/YYYY-mm-dd HH-MM-SS/data.json` with the
 | `.flair`     | A string representing the flair or `null` for no flair. Defaults to no flair.                                            |
 | `.comments`  | An array of comments to add as strings, or `null` for no comments. Defaults to no comments.                              |
 
+You can also refer to the [`data.schema.json`](https://github.com/tigeryu8900/reddit-scheduler/blob/main/data.schema.json)
+schema file.
+
 Here's an example `data.json`. `1.png` and `2.png` are in the same directory as `data.json`.
 
 ```json

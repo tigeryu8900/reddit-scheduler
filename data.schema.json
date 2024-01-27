@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/tigeryu8900/reddit-scheduler/main/data.schema.json",
+  "title": "Record of Employee",
+  "description": "This document records the details of an employee",
+  "type": "object",
+  "properties": {
+    "subreddit": {
+      "description": "The name of subreddit with the `r/` part. This could start with `u/` or `user/` instead if we're posting to a user page.",
+      "type": "string"
+    },
+    "title": {
+      "description": "The title of the post.",
+      "type": "string"
+    },
+    "type": {
+      "description": "The type of post.",
+      "type": "string"
+    },
+    "body": {
+      "description": "The body of the post. Defaults to no body.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "file": {
+      "description": "The path to the file of the image or video relative to the JSON file.",
+      "type": "string"
+    },
+    "images": {
+      "description": "An array specifying the file, caption, and link for each image.",
+      "type": "array",
+      "items": {
+        "description": "The file, caption, and link for this image.",
+        "type": "object",
+        "properties": {
+          "file": {
+            "description": "The path to the file of the image post relative to the JSON file.",
+            "type": "string"
+          },
+          "caption": {
+            "description": "The caption of the image or `null` for no caption. Defaults to no caption.",
+            "type": ["string", "null"]
+          },
+          "link": {
+            "description": "The link of the image or `null` for no link. Defaults to no link.",
+            "type": ["string", "null"]
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "minItems": 2
+    },
+    "thumbnail": {
+      "description": "A number from 1 to 10 inclusive indicating the thumbnail to choose. Defaults to first image.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "gif": {
+      "description": "Whether or not to convert video to GIF. Defaults to `false`.",
+      "type": "boolean"
+    },
+    "url": {
+      "description": "The url for the post.",
+      "type": "string"
+    },
+    "oc": {
+      "description": "Whether or not to mark post as OC. Defaults to `false`.",
+      "type": "boolean"
+    },
+    "spoiler": {
+      "description": "Whether or not to mark post as spoiler. Defaults to `false`.",
+      "type": "boolean"
+    },
+    "nsfw": {
+      "description": "Whether or not to mark post as nsfw. Defaults to `false`.",
+      "type": "boolean"
+    },
+    "flair": {
+      "description": "A string representing the flair or `null` for no flair. Defaults to no flair.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "comments": {
+      "description": "An array of comments to add as strings, or `null` for no comments. Defaults to no comments.",
+      "type": "array",
+      "items": {
+        "description": "A comment to add.",
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "subreddit",
+    "title",
+    "type"
+  ],
+  "anyOf": [
+    {
+      "properties": {
+        "type": {
+          "const": "text"
+        }
+      },
+      "required": []
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "post"
+        }
+      },
+      "required": []
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "image"
+        }
+      },
+      "required": [
+        "file"
+      ]
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "gallery"
+        }
+      },
+      "required": [
+        "images"
+      ]
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "images"
+        }
+      },
+      "required": [
+        "images"
+      ]
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "video"
+        }
+      },
+      "required": [
+        "file"
+      ]
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "link"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "url"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  ]
+}
