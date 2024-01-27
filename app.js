@@ -10,9 +10,11 @@ const userDataDir = path.join(ctxDir, "User Data");
 const pendingDir = path.join(ctxDir, "pending");
 const doneDir = path.join(ctxDir, "done");
 const scheduled = {};
+const running = new Set();
 
 async function post(browser, dir) {
     console.log(dir, "Starting");
+    running.add(dir);
     const data = JSON.parse((await fs.readFile(path.join(pendingDir, dir, "data.json"))).toString());
     console.log(dir, "Starting Puppeteer");
     const page = await browser.newPage();
@@ -142,15 +144,17 @@ async function post(browser, dir) {
         console.error(dir, "Error", data, e);
     } finally {
         await page.close();
+        running.delete(dir);
     }
 }
 
 function schedule(browser, dir, retry = false) {
     try {
-        let time = Date.parse(dir.replace(/^(\d+)-(\d+)-(\d+) (\d+)-(\d+)-(\d+)$/,
+        const time = Date.parse(dir.replace(/^(\d+)-(\d+)-(\d+) (\d+)-(\d+)-(\d+)$/,
             "$1-$2-$3T$4:$5:$6"));
-        if (retry || !scheduled.hasOwnProperty(time)) {
-            scheduled[time] = setTimeout(post, time - Date.now(), browser, dir);
+        if ((retry || !scheduled.hasOwnProperty(dir)) && !running.has(dir)) {
+            clearTimeout(scheduled[dir]);
+            scheduled[dir] = setTimeout(post, time - Date.now(), browser, dir);
             console.log(dir, "Scheduled");
         }
     } catch (e) {
