@@ -145,11 +145,11 @@ async function post(browser, dir) {
     }
 }
 
-function schedule(browser, dir) {
+function schedule(browser, dir, retry = false) {
     try {
         let time = Date.parse(dir.replace(/^(\d+)-(\d+)-(\d+) (\d+)-(\d+)-(\d+)$/,
             "$1-$2-$3T$4:$5:$6"));
-        if (!scheduled.hasOwnProperty(time)) {
+        if (retry || !scheduled.hasOwnProperty(time)) {
             scheduled[time] = setTimeout(post, time - Date.now(), browser, dir);
             console.log(dir, "Scheduled");
         }
@@ -158,9 +158,9 @@ function schedule(browser, dir) {
     }
 }
 
-async function scheduleAll(browser) {
+async function scheduleAll(browser, retry = false) {
     for (let dir of await fs.readdir(pendingDir)) {
-        schedule(browser, dir);
+        schedule(browser, dir, retry);
     }
 }
 
@@ -190,17 +190,15 @@ async function scheduleAll(browser) {
     await scheduleAll(browser);
     for await (let event of fs.watch(pendingDir)) {
         const filepath = path.join(pendingDir, event.filename);
-        switch (event.filename) {
-            case "refresh":
-                if (await new Promise(resolve => fs.access(filepath)
-                    .then(() => resolve(true), () => resolve(false)))) {
-                    await fs.rm(filepath).catch(() => fs.rmdir(filepath));
-                    await scheduleAll(browser);
-                    break;
-                }
-                // falls through
-            default:
-                schedule(browser, event.filename);
+        if (event.filename === "retry") {
+            if (await new Promise(resolve => fs.access(filepath)
+                .then(() => resolve(true), () => resolve(false)))) {
+                console.log("Retrying");
+                await fs.rm(filepath).catch(() => fs.rmdir(filepath));
+                await scheduleAll(browser, true);
+            }
+        } else {
+            schedule(browser, event.filename);
         }
     }
 })();
