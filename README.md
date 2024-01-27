@@ -23,10 +23,10 @@ Create a JSON file at `~/.reddit/pending/YYYY-mm-dd HH-MM-SS/data.json` with the
 |--------------|--------------------------------------------------------------------------------------------------------------------------|
 | `.subreddit` | The name of subreddit with the `r/` part. This could start with `u/` or `user/` instead if we're posting to a user page. |
 | `.title`     | The title of the post.                                                                                                   |
-| `.type`      | The type of post. Check the subsections below for more info                                                              |
+| `.type`      | The type of post. Check the subsections below for more info.                                                             |
 | `.oc`        | Whether or not to mark post as OC. Defaults to `false`.                                                                  |
 | `.spoiler`   | Whether or not to mark post as spoiler. Defaults to `false`.                                                             |
-| `.oc`        | Whether or not to mark post as NSFW. Defaults to `false`.                                                                |
+| `.nsfw`      | Whether or not to mark post as NSFW. Defaults to `false`.                                                                |
 | `.flair`     | A string representing the flair or `null` for no flair. Defaults to no flair.                                            |
 | `.comments`  | An array of comments to add as strings, or `null` for no comments. Defaults to no comments.                              |
 
@@ -72,20 +72,20 @@ For text posts, the `.type` field should be `text` or `post`. Additionally, ther
 
 For image posts, the `.type` field should be `image`. Additionally, there are these fields:
 
-| fields  | description                                                       |
-|---------|-------------------------------------------------------------------|
-| `.file` | The path to the file of the image post relative to the JSON file. |
+| fields  | description                                                      |
+|---------|------------------------------------------------------------------|
+| `.file` | The path to the file of the image relative to the JSON file. |
 
 ### Gallery posts
 
 For gallery posts, the `.type` field should be `gallery` or `images`. Additionally, there are these fields:
 
-| fields               | description                                                              |
-|----------------------|--------------------------------------------------------------------------|
-| `.images`            | An array specifying the file, caption, and link for each image.          |
-| `.images[i].file`    | The path to the file of the image post relative to the JSON file.        |
-| `.images[i].caption` | The caption of the image or `null` for no caption. Defaults to no image. |
-| `.images[i].link`    | The link of the image or `null` for no link. Defaults to no link.        |
+| fields               | description                                                                |
+|----------------------|----------------------------------------------------------------------------|
+| `.images`            | An array specifying the file, caption, and link for each image.            |
+| `.images[i].file`    | The path to the file of the image post relative to the JSON file.          |
+| `.images[i].caption` | The caption of the image or `null` for no caption. Defaults to no caption. |
+| `.images[i].link`    | The link of the image or `null` for no link. Defaults to no link.          |
 
 ### Video posts
 
@@ -93,11 +93,11 @@ For video posts, the `.type` field should be `video`. Additionally, there are th
 
 | fields            | description                                                                                  |
 |-------------------|----------------------------------------------------------------------------------------------|
-| `.file`           | The path to the file of the image post relative to the JSON file.                            |
+| `.file`           | The path to the file of the video relative to the JSON file.                                 |
 | `.thumbnail`      | A number from 1 to 10 inclusive indicating the thumbnail to choose. Defaults to first image. |
 | `.gif`            | Whether or not to convert video to GIF. Defaults to `false`.                                 |
 
-### Video posts
+### Link posts
 
 For link posts, the `.type` field should be `link` or `url`. Additionally, there are these fields:
 
