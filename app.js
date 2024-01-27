@@ -84,7 +84,7 @@ async function post(browser, dir) {
                 console.log(dir, "Adding video");
                 let elementHandle = await page.$('input[type="file"]');
                 await elementHandle.uploadFile(path.join(pendingDir, dir, data.file));
-                await page.waitForSelector('::-p-xpath(//*[text()="Choose thumbnail"])', {
+                await page.waitForSelector('::-p-xpath(//*[not(.//*) and text()="Choose thumbnail"])', {
                     timeout: 5 * 60 * 1000
                 });
                 if (data.thumbnail) {
