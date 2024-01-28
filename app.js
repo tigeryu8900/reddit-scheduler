@@ -202,8 +202,8 @@ async function exit(signal) {
     headless: "new",
     userDataDir
   });
-  for (let signal of ["SIGHUP", "SIGINT", "SIGTERM"]) {
-    process.once(signal, exit.bind(browser));
+  for (let event of ["SIGHUP", "SIGINT", "SIGTERM", "uncaughtException", "unhandledRejection"]) {
+    process.once(event, exit.bind(browser));
   }
   const page = await browser.newPage();
   await page.setUserAgent((await browser.userAgent()).replace(/headless/gi, ""));
