@@ -21,16 +21,17 @@ characters as identification such as `2024-01-28 11-23-00 an interesting post`, 
 
 Create a JSON file at `~/.reddit/pending/YYYY-mm-dd HH-MM-SS/data.json` with these fields:
 
-| fields       | description                                                                                                              |
-|--------------|--------------------------------------------------------------------------------------------------------------------------|
-| `.subreddit` | The name of subreddit with the `r/` part. This could start with `u/` or `user/` instead if we're posting to a user page. |
-| `.title`     | The title of the post.                                                                                                   |
-| `.type`      | The type of post. Check the subsections below for more info.                                                             |
-| `.oc`        | Whether or not to mark post as OC. Defaults to `false`.                                                                  |
-| `.spoiler`   | Whether or not to mark post as spoiler. Defaults to `false`.                                                             |
-| `.nsfw`      | Whether or not to mark post as NSFW. Defaults to `false`.                                                                |
-| `.flair`     | A string representing the flair or `null` for no flair. Defaults to no flair.                                            |
-| `.comments`  | An array of comments to add as strings, or `null` for no comments. Defaults to no comments.                              |
+| fields        | description                                                                                                              |
+|---------------|--------------------------------------------------------------------------------------------------------------------------|
+| `.subreddit`  | The name of subreddit with the `r/` part. This could start with `u/` or `user/` instead if we're posting to a user page. |
+| `.title`      | The title of the post.                                                                                                   |
+| `.type`       | The type of post. Check the subsections below for more info.                                                             |
+| `.oc`         | Whether or not to mark post as OC. Defaults to `false`.                                                                  |
+| `.spoiler`    | Whether or not to mark post as spoiler. Defaults to `false`.                                                             |
+| `.nsfw`       | Whether or not to mark post as NSFW. Defaults to `false`.                                                                |
+| `.flair`      | A string representing the flair or `null` for no flair. Defaults to no flair.                                            |
+| `.comments`   | An array of comments to add as strings, or `null` for no comments. Defaults to no comments.                              |
+| `.maxRetries` | The maximum number of retries. Defaults to `0`.                                                                          |
 
 You can also refer to the [`data.schema.json`](https://github.com/tigeryu8900/reddit-scheduler/blob/main/data.schema.json)
 schema file.

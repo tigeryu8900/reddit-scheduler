@@ -95,6 +95,11 @@
         "description": "A comment to add.",
         "type": "string"
       }
+    },
+    "maxRetries": {
+      "description": "The maximum number of retries. Defaults to `0`.",
+      "type": "integer",
+      "minimum": 0
     }
   },
   "required": [
