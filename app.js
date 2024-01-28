@@ -153,8 +153,8 @@ async function post(browser, dir) {
 
 function schedule(browser, dir, retry = false) {
   try {
-    const time = Date.parse(dir.replace(/^(\d+)-(\d+)-(\d+) (\d+)-(\d+)-(\d+)$/,
-      "$1-$2-$3T$4:$5:$6"));
+    const time = Date.parse(dir.replace(/^.*(?<!\d)(\d+)-(\d+)-(\d+) (\d+)-(\d+)-(\d+)(?!\d).*$/,
+        "$1-$2-$3T$4:$5:$6"));
     if ((retry || !scheduled.hasOwnProperty(dir)) && !running.has(dir)) {
       clearTimeout(scheduled[dir]);
       scheduled[dir] = setTimeout(post, time - Date.now(), browser, dir);

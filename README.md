@@ -14,8 +14,9 @@ PASSWORD=password
 
 Then, create the `~/.reddit/pending/` directory.
 
-Now, for each scheduled post, create a folder of the format `YYYY-mm-dd HH-MM-SS` in `~/.reddit/pending/` where the
-folder name corresponds to the scheduled time.
+Now, for each scheduled post, create a folder containing a string in the format `YYYY-mm-dd HH-MM-SS` in
+`~/.reddit/pending/` where the folder name corresponds to the scheduled time. The folder name can include extra
+characters as identification such as `2024-01-28 11-23-00 an interesting post`, which are ignored by the script.
 
 Create a JSON file at `~/.reddit/pending/YYYY-mm-dd HH-MM-SS/data.json` with these fields:
 
