@@ -46,7 +46,7 @@ async function post(browser, dir) {
         await page.click('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
         console.log(dir, "Adding image");
         let elementHandle = await page.$('input[type="file"]');
-        await elementHandle.uploadFile(path.join(pendingDir, dir, data.file));
+        await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
       } break;
       case "gallery":
       case "images": {
@@ -55,7 +55,7 @@ async function post(browser, dir) {
         console.log(dir, "Adding images");
         for (let image of data.images) {
           let elementHandle = await page.$('input[type="file"]');
-          await elementHandle.uploadFile(path.join(pendingDir, dir, image.file));
+          await elementHandle.uploadFile(path.resolve(pendingDir, dir, image.file));
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
         let divs = [];
@@ -85,7 +85,7 @@ async function post(browser, dir) {
         await page.click('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
         console.log(dir, "Adding video");
         let elementHandle = await page.$('input[type="file"]');
-        await elementHandle.uploadFile(path.join(pendingDir, dir, data.file));
+        await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
         await page.waitForSelector('::-p-xpath(//*[not(.//*) and text()="Choose thumbnail"])', {
           timeout: 5 * 60 * 1000
         });
