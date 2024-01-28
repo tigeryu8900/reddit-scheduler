@@ -76,8 +76,8 @@ For text posts, the `.type` field should be `text` or `post`. Additionally, ther
 
 For image posts, the `.type` field should be `image`. Additionally, there are these fields:
 
-| fields  | description                                                      |
-|---------|------------------------------------------------------------------|
+| fields  | description                                                  |
+|---------|--------------------------------------------------------------|
 | `.file` | The path to the file of the image relative to the JSON file. |
 
 ### Gallery posts
