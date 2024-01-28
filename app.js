@@ -187,9 +187,11 @@ async function exit(signal) {
 (async () => {
   await fs.mkdir(ctxDir, {recursive: true}).catch(() => {});
   await fs.access(pidDir).then(async () => {
-    console.log("Another instance is running, stopping that instance");
     process.kill(parseInt((await fs.readFile(pidDir)).toString()));
-  }, () => {});
+    console.log("Another instance is running, stopping that instance");
+  }, () => {}).catch(() => {
+    console.log("Previous instance crashed. You should check the logs.");
+  });
   await fs.writeFile(pidDir, process.pid.toString());
   console.log("Starting", Date());
   await fs.mkdir(userDataDir, {recursive: true}).catch(() => {});
