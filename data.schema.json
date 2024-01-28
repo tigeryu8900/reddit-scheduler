@@ -7,7 +7,8 @@
   "properties": {
     "subreddit": {
       "description": "The name of subreddit with the `r/` part. This could start with `u/` or `user/` instead if we're posting to a user page.",
-      "type": "string"
+      "type": "string",
+      "pattern": "^(?:r/[\\w_]{3,21}|(?:u|user)/[\\w\\-_]{3,20})$"
     },
     "title": {
       "description": "The title of the post.",
