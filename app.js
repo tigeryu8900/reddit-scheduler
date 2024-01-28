@@ -199,7 +199,17 @@ async function exit(signal) {
   await fs.mkdir(failedDir, {recursive: true}).catch(() => {});
   await fs.mkdir(doneDir, {recursive: true}).catch(() => {});
   const browser = await puppeteer.launch({
-    headless: "new",
+    headless: new Proxy({
+      1: true,
+      0: false,
+      true: true,
+      false: false,
+      undefined: "new"
+    }, {
+      get(obj, prop) {
+        return (prop in obj) ? obj[prop] : prop;
+      }
+    })[process.env.HEADLESS],
     userDataDir
   });
   for (let event of ["SIGHUP", "SIGINT", "SIGTERM", "uncaughtException", "unhandledRejection"]) {

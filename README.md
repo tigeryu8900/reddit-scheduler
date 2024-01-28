@@ -5,11 +5,12 @@ A Reddit scheduler for posts
 ## Set up
 
 Create a `.env` file in the project root directory in this format where `username` and `password` are the Reddit
-credentials.
+credentials. The `HEADLESS` variable, which is passed into Puppeteer, defaults to `new` if missing.
 
 ```dotenv
 USERNAME=username
 PASSWORD=password
+HEADLESS=new
 ```
 
 Then, create the `~/.reddit/pending/` directory.
