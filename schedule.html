@@ -83,7 +83,7 @@
                 <input name="caption" type="text" class="form-control caption" aria-label="Caption" placeholder="Caption">
               </div>
               <div class="input-group mb-3">
-                <input name="link" type="text" class="form-control link" aria-label="Link" placeholder="Link">
+                <input name="link" type="url" class="form-control link" aria-label="Link" placeholder="Link">
               </div>
             </div>
             <div class="card-footer">
@@ -540,131 +540,133 @@
   </script>
 </head>
 <body>
-<div class="mb-3">
-  <label for="dir" class="form-label">Folder name</label>
-  <input name="dir" type="text" class="form-control" id="dir"
-         placeholder="A string containing a time in the format YYYY-mm-dd HH-MM-SS">
-</div>
-<div class="mb-3">
-  <label for="subreddit" class="form-label">Subreddit</label>
-  <input name="subreddit" type="text" class="form-control" id="subreddit" placeholder="r/subreddit or u/user">
-</div>
-<div class="mb-3">
-  <label for="title" class="form-label">Title</label>
-  <input name="title" type="text" class="form-control" id="title" placeholder="Title">
-</div>
-<input name="type" type="hidden" id="type" value="post">
-<ul class="nav nav-tabs" id="tabs" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" id="post-tab" data-bs-toggle="tab" data-bs-target="#post-tab-pane" type="button"
-            role="tab" aria-controls="post-tab-pane" aria-selected="true">Post
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="image-tab" data-bs-toggle="tab" data-bs-target="#image-tab-pane" type="button"
-            role="tab" aria-controls="image-tab-pane" aria-selected="false">Image
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="gallery-tab" data-bs-toggle="tab" data-bs-target="#gallery-tab-pane" type="button"
-            role="tab" aria-controls="gallery-tab-pane" aria-selected="false">Gallery
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-tab-pane" type="button"
-            role="tab" aria-controls="video-tab-pane" aria-selected="false">Video
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="link-tab" data-bs-toggle="tab" data-bs-target="#link-tab-pane" type="button"
-            role="tab" aria-controls="link-tab-pane" aria-selected="false">Link
-    </button>
-  </li>
-</ul>
-<div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade show active" id="post-tab-pane" role="tabpanel" aria-labelledby="post-tab" tabindex="0">
-    <div class="mb-3">
-      <label for="body" class="form-label">Body</label>
-      <textarea class="form-control" id="body" rows="3" placeholder="Text (optional)"></textarea>
-    </div>
+<form action="javascript:void(0);">
+  <div class="mb-3">
+    <label for="dir" class="form-label">Folder name</label>
+    <input name="dir" type="text" class="form-control" id="dir"
+           placeholder="A string containing a time in the format YYYY-mm-dd HH-MM-SS">
   </div>
-  <div class="tab-pane fade" id="image-tab-pane" role="tabpanel" aria-labelledby="image-tab" tabindex="0">
-    <label for="image-path" class="form-label">Image (drag and drop and paste are supported)</label>
-    <div class="input-group mb-3" id="image">
-      <input name="image-file" type="file" class="form-control" id="image-file">
-      <span class="input-group-text">or</span>
-      <input name="image-path" type="text" class="form-control" aria-label="File URL or file path" id="image-path"
-             placeholder="/path/to/image.png or https://example.com/image.png">
+  <div class="mb-3">
+    <label for="subreddit" class="form-label">Subreddit</label>
+    <input name="subreddit" type="text" class="form-control" id="subreddit" placeholder="r/subreddit or u/user">
+  </div>
+  <div class="mb-3">
+    <label for="title" class="form-label">Title</label>
+    <input name="title" type="text" class="form-control" id="title" placeholder="Title">
+  </div>
+  <input name="type" type="hidden" id="type" value="post">
+  <ul class="nav nav-tabs" id="tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="post-tab" data-bs-toggle="tab" data-bs-target="#post-tab-pane" type="button"
+              role="tab" aria-controls="post-tab-pane" aria-selected="true">Post
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="image-tab" data-bs-toggle="tab" data-bs-target="#image-tab-pane" type="button"
+              role="tab" aria-controls="image-tab-pane" aria-selected="false">Image
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="gallery-tab" data-bs-toggle="tab" data-bs-target="#gallery-tab-pane" type="button"
+              role="tab" aria-controls="gallery-tab-pane" aria-selected="false">Gallery
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-tab-pane" type="button"
+              role="tab" aria-controls="video-tab-pane" aria-selected="false">Video
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="link-tab" data-bs-toggle="tab" data-bs-target="#link-tab-pane" type="button"
+              role="tab" aria-controls="link-tab-pane" aria-selected="false">Link
+      </button>
+    </li>
+  </ul>
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="post-tab-pane" role="tabpanel" aria-labelledby="post-tab" tabindex="0">
+      <div class="mb-3">
+        <label for="body" class="form-label">Body</label>
+        <textarea class="form-control" id="body" rows="3" placeholder="Text (optional)"></textarea>
+      </div>
     </div>
-    <div class="container">
-      <div class="row">
-        <div class="card col-6 offset-3" id="image-card">
-          <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
-               alt="image preview"
-               class="card-img" id="image-preview"/>
+    <div class="tab-pane fade" id="image-tab-pane" role="tabpanel" aria-labelledby="image-tab" tabindex="0">
+      <label for="image-path" class="form-label">Image (drag and drop and paste are supported)</label>
+      <div class="input-group mb-3" id="image">
+        <input name="image-file" type="file" class="form-control" id="image-file">
+        <span class="input-group-text">or</span>
+        <input name="image-path" type="text" class="form-control" aria-label="File URL or file path" id="image-path"
+               placeholder="/path/to/image.png or https://example.com/image.png">
+      </div>
+      <div class="container">
+        <div class="row">
+          <div class="card col-6 offset-3" id="image-card">
+            <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                 alt="image preview"
+                 class="card-img" id="image-preview"/>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="tab-pane fade" id="gallery-tab-pane" role="tabpanel" aria-labelledby="gallery-tab" tabindex="0">
-    <label class="form-label">Images (drag and drop and paste are supported)</label>
-    <div class="btn-group w-100" role="group">
-      <button class="btn btn-primary" id="add-image">Add</button>
-      <button class="btn btn-primary" id="clear-images">Clear</button>
+    <div class="tab-pane fade" id="gallery-tab-pane" role="tabpanel" aria-labelledby="gallery-tab" tabindex="0">
+      <label class="form-label">Images (drag and drop and paste are supported)</label>
+      <div class="btn-group w-100" role="group">
+        <button class="btn btn-primary" id="add-image">Add</button>
+        <button class="btn btn-primary" id="clear-images">Clear</button>
+      </div>
+      <div class="container-fluid">
+        <div class="row flex-nowrap overflow-auto" id="images"></div>
+      </div>
     </div>
-    <div class="container-fluid">
-      <div class="row flex-nowrap overflow-auto" id="images"></div>
-    </div>
-  </div>
-  <div class="tab-pane fade" id="video-tab-pane" role="tabpanel" aria-labelledby="video-tab" tabindex="0">
-    <label for="image-path" class="form-label">Image (drag and drop and paste are supported)</label>
-    <div class="input-group mb-3" id="video">
-      <input name="video-file" type="file" class="form-control" id="video-file">
-      <span class="input-group-text">or</span>
-      <input name=video-path" type="text" class="form-control" aria-label="File URL or file path" id="video-path"
-             placeholder="/path/to/image.png or https://example.com/image.png">
-    </div>
-    <div class="container">
-      <div class="row">
-        <div class="card col-6 offset-3" id="video-card">
-          <video src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
-                 class="card-img" id="video-preview" controls></video>
-          <div class="card-footer">
-            <div class="form-check form-switch">
-              <input name="gif" class="form-check-input" type="checkbox" role="switch" id="gif">
-              <label class="form-check-label" for="gif">Convert to GIF</label>
+    <div class="tab-pane fade" id="video-tab-pane" role="tabpanel" aria-labelledby="video-tab" tabindex="0">
+      <label for="image-path" class="form-label">Image (drag and drop and paste are supported)</label>
+      <div class="input-group mb-3" id="video">
+        <input name="video-file" type="file" class="form-control" id="video-file">
+        <span class="input-group-text">or</span>
+        <input name=video-path" type="text" class="form-control" aria-label="File URL or file path" id="video-path"
+               placeholder="/path/to/image.png or https://example.com/image.png">
+      </div>
+      <div class="container">
+        <div class="row">
+          <div class="card col-6 offset-3" id="video-card">
+            <video src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                   class="card-img" id="video-preview" controls></video>
+            <div class="card-footer">
+              <div class="form-check form-switch">
+                <input name="gif" class="form-check-input" type="checkbox" role="switch" id="gif">
+                <label class="form-check-label" for="gif">Convert to GIF</label>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="tab-pane fade" id="link-tab-pane" role="tabpanel" aria-labelledby="link-tab" tabindex="0">
-    <div class="mb-3">
-      <label for="url" class="form-label">URL</label>
-      <input name="url" type="text" class="form-control" id="url" placeholder="https://example.com">
+    <div class="tab-pane fade" id="link-tab-pane" role="tabpanel" aria-labelledby="link-tab" tabindex="0">
+      <div class="mb-3">
+        <label for="url" class="form-label">URL</label>
+        <input name="url" type="text" class="form-control" id="url" placeholder="https://example.com">
+      </div>
     </div>
   </div>
-</div>
-<label class="form-label">Comments</label>
-<div class="btn-group w-100" role="group">
-  <button class="btn btn-primary" id="add-comment">Add</button>
-  <button class="btn btn-primary" id="clear-comments">Clear</button>
-</div>
-<label class="form-label"></label>
-<div id="comments"></div>
-<label class="form-label">Flags and Flairs</label>
-<div class="input-group mb-3">
-  <span class="input-group-text">Flags</span>
-  <input name="oc" type="checkbox" class="btn-check" id="oc" autocomplete="off">
-  <label class="btn" for="oc">OC</label>
-  <input name="spoiler" type="checkbox" class="btn-check" id="spoiler" autocomplete="off">
-  <label class="btn" for="spoiler">Spoiler</label>
-  <input name="nsfw" type="checkbox" class="btn-check" id="nsfw" autocomplete="off">
-  <label class="btn" for="nsfw">NSFW</label>
-  <span class="input-group-text">Flair</span>
-  <input name="flair" type="text" class="form-control" aria-label="flair" placeholder="flair" id="flair">
-  <button class="btn btn-primary" type="button" id="schedule">Schedule</button>
-</div>
+  <label class="form-label">Comments</label>
+  <div class="btn-group w-100" role="group">
+    <button class="btn btn-primary" id="add-comment">Add</button>
+    <button class="btn btn-primary" id="clear-comments">Clear</button>
+  </div>
+  <label class="form-label"></label>
+  <div id="comments"></div>
+  <label class="form-label">Flags and Flairs</label>
+  <div class="input-group mb-3">
+    <span class="input-group-text">Flags</span>
+    <input name="oc" type="checkbox" class="btn-check" id="oc" autocomplete="off">
+    <label class="btn" for="oc">OC</label>
+    <input name="spoiler" type="checkbox" class="btn-check" id="spoiler" autocomplete="off">
+    <label class="btn" for="spoiler">Spoiler</label>
+    <input name="nsfw" type="checkbox" class="btn-check" id="nsfw" autocomplete="off">
+    <label class="btn" for="nsfw">NSFW</label>
+    <span class="input-group-text">Flair</span>
+    <input name="flair" type="text" class="form-control" aria-label="flair" placeholder="flair" id="flair">
+    <input class="btn btn-primary" type="submit" id="schedule" value="Schedule">
+  </div>
+</form>
 </body>
 </html>
