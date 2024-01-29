@@ -125,6 +125,9 @@ npm start
 # To stop the script, run this
 npm stop
 
+# To schedule a post using the GUI, run this
+npm run schedule
+
 # To reschedule all tasks in ~/.reddit/pending/, run this
 npm run reschedule
 ```

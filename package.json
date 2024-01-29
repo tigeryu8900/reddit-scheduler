@@ -16,12 +16,14 @@
     "restart": "npm start",
     "restart:fg": "npm start:fg",
     "restart:bg": "npm start:bg",
+    "schedule": "node schedule.js",
     "reschedule": "touch ~/.reddit/pending/reschedule"
   },
   "keywords": [],
   "author": "tigeryu8900",
   "license": "ISC",
   "dependencies": {
+    "clipboardy": "^4.0.0",
     "dotenv": "^16.4.1",
     "puppeteer": "^21.9.0"
   }

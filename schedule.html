@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Schedule Post</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs"
+      crossorigin="anonymous"></script>
+
+  <script>
+    $(document).ready(function () {
+      const type = $('#type');
+      const imageFile = $('#image-file');
+      const imagePath = $('#image-path');
+      const imagePreview = $('#image-preview');
+      const addImage = $('#add-image');
+      const clearImages = $('#clear-images');
+      const images = $('#images');
+      const videoFile = $('#video-file');
+      const videoPath = $('#video-path');
+      const videoPreview = $('#video-preview');
+      const schedule = $('#schedule');
+      const comments = $('#comments');
+      const addComment = $('#add-comment');
+      const clearComments = $('#clear-comments');
+
+      $('#post-tab').click(() => type.val("post"));
+      $('#image-tab').click(() => type.val("image"));
+      $('#gallery-tab').click(() => type.val("gallery"));
+      $('#video-tab').click(() => type.val("video"));
+      $('#link-tab').click(() => type.val("link"));
+
+      const date = new Date();
+      $('#dir').val(`${
+        date.getFullYear().toString().padStart(4, "0")
+      }-${
+        (date.getMonth() + 1).toString().padStart(2, "0")
+      }-${
+        date.getDate().toString().padStart(2, "0")
+      } ${
+        date.getHours().toString().padStart(2, "0")
+      }-${
+        date.getMinutes().toString().padStart(2, "0")
+      }-${
+        date.getSeconds().toString().padStart(2, "0")
+      }`);
+
+      function updateImageSrc() {
+        if (imagePath.val().length) {
+          imagePreview.attr("src", imagePath.val());
+          imageFile.val("");
+        } else if (imageFile.prop("files").length) {
+          imagePreview.attr("src", URL.createObjectURL(imageFile.prop("files")[0]));
+        } else {
+          imagePreview.attr("src", "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
+        }
+      }
+
+      imageFile.on("change", updateImageSrc);
+      imagePath.on("change", updateImageSrc);
+
+      function createGalleryCard() {
+        const card = $(String.raw`
+          <div class="card col-6">
+            <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+               class="card-img-top image-preview" alt="image preview">
+            <div class="card-body">
+              <div class="input-group mb-3">
+                <input type="file" class="form-control image-file">
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text">or</span>
+                <input type="text" class="form-control image-path" aria-label="File URL or file path"
+                    placeholder="/path/to/image.png or https://example.com/image.png">
+              </div>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control caption" aria-label="Caption" placeholder="Caption">
+              </div>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control link" aria-label="Link" placeholder="Link">
+              </div>
+            </div>
+            <div class="card-footer">
+              <div class="btn-group w-100" role="group">
+                <button class="btn btn-primary add-left">Add left</button>
+                <button class="btn btn-primary delete">Delete</button>
+                <button class="btn btn-primary add-right">Add right</button>
+              </div>
+            </div>
+          </div>
+        `);
+
+        const imageFile = card.find('.image-file');
+        const imagePath = card.find('.image-path');
+        const imagePreview = card.find('.image-preview');
+        const addLeft = card.find('.add-left');
+        const del = card.find('.delete');
+        const addRight = card.find('.add-right');
+
+        function updateImageSrc() {
+          if (imagePath.val().length) {
+            imagePreview.attr("src", imagePath.val());
+            imageFile.val("");
+          } else if (imageFile.prop("files").length) {
+            imagePreview.attr("src", URL.createObjectURL(imageFile.prop("files")[0]));
+          } else {
+            imagePreview.attr("src", "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
+          }
+        }
+
+        imageFile.on("change", updateImageSrc);
+        imagePath.on("change", updateImageSrc);
+
+        addLeft.click(function () {
+          card.before(createGalleryCard());
+        });
+        del.click(function () {
+          card.remove();
+        })
+        addRight.click(function () {
+          card.after(createGalleryCard());
+        });
+
+        return card;
+      }
+
+      addImage.click(function () {
+        images.append(createGalleryCard());
+      });
+
+      clearImages.click(function () {
+        images.empty();
+      });
+
+      function updateVideoSrc() {
+        if (videoPath.val().length) {
+          videoPreview.attr("src", videoPath.val());
+          videoFile.val("");
+        } else if (videoFile.prop("files").length) {
+          videoPreview.attr("src", URL.createObjectURL(videoFile.prop("files")[0]));
+        } else {
+          videoPreview.attr("src", "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
+        }
+      }
+
+      videoFile.on("change", updateVideoSrc);
+      videoPath.on("change", updateVideoSrc);
+
+      const pathHandlers = {
+        post() {
+        },
+        image(str) {
+          imageFile.val("");
+          imagePath.val(str);
+          updateImageSrc();
+        },
+        gallery(str) {
+          const card = createGalleryCard();
+          const imagePath = card.find('.image-path');
+          imagePath.val(str);
+          images.append(card);
+          imagePath.trigger("change");
+        },
+        video(str) {
+          videoFile.val("");
+          videoPath.val(str);
+          updateVideoSrc();
+        }
+      };
+      const fileHandlers = {
+        post() {
+        },
+        image(file) {
+          imagePath.val("");
+          imageFile.val("");
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          imageFile.prop("files", dataTransfer.files);
+          updateImageSrc();
+        },
+        gallery(file) {
+          const card = createGalleryCard();
+          const imageFile = card.find('.image-file');
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          imageFile.prop("files", dataTransfer.files);
+          images.append(card);
+          imageFile.trigger("change");
+        },
+        video(file) {
+          videoPath.val("");
+          videoFile.val("");
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          videoFile.prop("files", dataTransfer.files);
+          updateVideoSrc();
+        }
+      };
+      $(document.documentElement).on("dragover", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).addClass("dragging");
+      });
+      $(document.documentElement).on("dragleave", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).removeClass("dragging");
+      });
+      $(document.documentElement).on("drop dragdrop paste", e => {
+        for (let item of e.originalEvent.dataTransfer?.items ?? e.originalEvent.clipboardData?.items) {
+          switch (item.kind) {
+            case "string":
+              switch (item.type) {
+                case "text":
+                case "text/plain":
+                case "text/uri-list":
+                  item.getAsString(uris => uris.split('\n').forEach(pathHandlers[type.val()]));
+                  e.preventDefault();
+                  break;
+              }
+              break;
+            case "file":
+              fileHandlers[type.val()](item.getAsFile());
+              e.preventDefault();
+              break;
+          }
+        }
+      });
+
+      function createComment() {
+        const comment = $(String.raw`
+          <div class="input-group mb-3" id="image">
+            <span class="input-group-text">Comment</span>
+            <input type="text" class="form-control comment" aria-label="Comment" placeholder="Comment">
+            <button class="btn btn-primary add-above" type="button">Add above</button>
+            <button class="btn btn-primary add-below" type="button">Add below</button>
+            <button class="btn btn-primary delete" type="button">Delete</button>
+          </div>
+        `);
+        comment.find('.add-above').click(function () {
+          comment.before(createComment());
+        });
+        comment.find('.add-below').click(function () {
+          comment.after(createComment());
+        });
+        comment.find('.delete').click(function () {
+          comment.remove();
+        });
+        return comment;
+      }
+
+      addComment.click(function () {
+        comments.append(createComment());
+      });
+
+      clearComments.click(function () {
+        comments.empty();
+      });
+
+      const mime2ext = {
+        'audio/x-mpeg': 'mpega',
+        'application/postscript': 'ps',
+        'audio/x-aiff': 'aiff',
+        'application/x-aim': 'aim',
+        'image/x-jg': 'art',
+        'video/x-ms-asf': 'asx',
+        'audio/basic': 'ulw',
+        'video/x-msvideo': 'avi',
+        'video/x-rad-screenplay': 'avx',
+        'application/x-bcpio': 'bcpio',
+        'application/octet-stream': 'exe',
+        'image/bmp': 'dib',
+        'text/html': 'html',
+        'application/x-cdf': 'cdf',
+        'application/pkix-cert': 'cer',
+        'application/java': 'class',
+        'application/x-cpio': 'cpio',
+        'application/x-csh': 'csh',
+        'text/css': 'css',
+        'application/msword': 'doc',
+        'application/xml-dtd': 'dtd',
+        'video/x-dv': 'dv',
+        'application/x-dvi': 'dvi',
+        'application/vnd.ms-fontobject': 'eot',
+        'text/x-setext': 'etx',
+        'image/gif': 'gif',
+        'application/x-gtar': 'gtar',
+        'application/x-gzip': 'gz',
+        'application/x-hdf': 'hdf',
+        'application/mac-binhex40': 'hqx',
+        'text/x-component': 'htc',
+        'image/ief': 'ief',
+        'text/vnd.sun.j2me.app-descriptor': 'jad',
+        'application/java-archive': 'jar',
+        'text/x-java-source': 'java',
+        'application/x-java-jnlp-file': 'jnlp',
+        'image/jpeg': 'jpg',
+        'application/javascript': 'js',
+        'text/plain': 'txt',
+        'application/json': 'json',
+        'audio/midi': 'midi',
+        'application/x-latex': 'latex',
+        'audio/x-mpegurl': 'm3u',
+        'image/x-macpaint': 'pnt',
+        'text/troff': 'tr',
+        'application/mathml+xml': 'mathml',
+        'application/x-mif': 'mif',
+        'video/quicktime': 'qt',
+        'video/x-sgi-movie': 'movie',
+        'audio/mpeg': 'mpa',
+        'video/mp4': 'mp4',
+        'video/mpeg': 'mpg',
+        'video/mpeg2': 'mpv2',
+        'application/x-wais-source': 'src',
+        'application/x-netcdf': 'nc',
+        'application/oda': 'oda',
+        'application/vnd.oasis.opendocument.database': 'odb',
+        'application/vnd.oasis.opendocument.chart': 'odc',
+        'application/vnd.oasis.opendocument.formula': 'odf',
+        'application/vnd.oasis.opendocument.graphics': 'odg',
+        'application/vnd.oasis.opendocument.image': 'odi',
+        'application/vnd.oasis.opendocument.text-master': 'odm',
+        'application/vnd.oasis.opendocument.presentation': 'odp',
+        'application/vnd.oasis.opendocument.spreadsheet': 'ods',
+        'application/vnd.oasis.opendocument.text': 'odt',
+        'application/vnd.oasis.opendocument.graphics-template': 'otg',
+        'application/vnd.oasis.opendocument.text-web': 'oth',
+        'application/vnd.oasis.opendocument.presentation-template': 'otp',
+        'application/vnd.oasis.opendocument.spreadsheet-template': 'ots',
+        'application/vnd.oasis.opendocument.text-template': 'ott',
+        'application/ogg': 'ogx',
+        'video/ogg': 'ogv',
+        'audio/ogg': 'spx',
+        'application/x-font-opentype': 'otf',
+        'audio/flac': 'flac',
+        'application/annodex': 'anx',
+        'audio/annodex': 'axa',
+        'video/annodex': 'axv',
+        'application/xspf+xml': 'xspf',
+        'image/x-portable-bitmap': 'pbm',
+        'image/pict': 'pict',
+        'application/pdf': 'pdf',
+        'image/x-portable-graymap': 'pgm',
+        'audio/x-scpls': 'pls',
+        'image/png': 'png',
+        'image/x-portable-anymap': 'pnm',
+        'image/x-portable-pixmap': 'ppm',
+        'application/vnd.ms-powerpoint': 'pps',
+        'image/vnd.adobe.photoshop': 'psd',
+        'image/x-quicktime': 'qtif',
+        'image/x-cmu-raster': 'ras',
+        'application/rdf+xml': 'rdf',
+        'image/x-rgb': 'rgb',
+        'application/vnd.rn-realmedia': 'rm',
+        'application/rtf': 'rtf',
+        'text/richtext': 'rtx',
+        'application/font-sfnt': 'sfnt',
+        'application/x-sh': 'sh',
+        'application/x-shar': 'shar',
+        'application/x-stuffit': 'sit',
+        'application/x-sv4cpio': 'sv4cpio',
+        'application/x-sv4crc': 'sv4crc',
+        'image/svg+xml': 'svgz',
+        'application/x-shockwave-flash': 'swf',
+        'application/x-tar': 'tar',
+        'application/x-tcl': 'tcl',
+        'application/x-tex': 'tex',
+        'application/x-texinfo': 'texinfo',
+        'image/tiff': 'tiff',
+        'text/tab-separated-values': 'tsv',
+        'application/x-font-ttf': 'ttf',
+        'application/x-ustar': 'ustar',
+        'application/voicexml+xml': 'vxml',
+        'image/x-xbitmap': 'xbm',
+        'application/xhtml+xml': 'xhtml',
+        'application/vnd.ms-excel': 'xls',
+        'application/xml': 'xsl',
+        'image/x-xpixmap': 'xpm',
+        'application/xslt+xml': 'xslt',
+        'application/vnd.mozilla.xul+xml': 'xul',
+        'image/x-xwindowdump': 'xwd',
+        'application/vnd.visio': 'vsd',
+        'audio/x-wav': 'wav',
+        'image/vnd.wap.wbmp': 'wbmp',
+        'text/vnd.wap.wml': 'wml',
+        'application/vnd.wap.wmlc': 'wmlc',
+        'text/vnd.wap.wmlsc': 'wmls',
+        'application/vnd.wap.wmlscriptc': 'wmlscriptc',
+        'video/x-ms-wmv': 'wmv',
+        'application/font-woff': 'woff',
+        'application/font-woff2': 'woff2',
+        'model/vrml': 'wrl',
+        'application/wspolicy+xml': 'wspolicy',
+        'application/x-compress': 'z',
+        'application/zip': 'zip'
+      }
+
+      function uniqueName(name, files) {
+        let [, base, ext] = name.match(/^(.*?)(\..*)?$/);
+        for (let i = 2; name in files; ++i) {
+          name = `${base} ${i}${ext}`;
+        }
+        files[name] = null;
+        return name;
+      }
+
+      async function handleFile(path, file, files) {
+        if (path) {
+          if (path.startsWith("file://")) {
+            path = decodeURIComponent(path.substring("file://".length));
+            const name = uniqueName(path.match(/[^\/]*$/)[0], files);
+            files[name] = {
+              type: "path",
+              data: path
+            };
+            return name;
+          } else if (/^https?:\/\//.test(path)) {
+            const response = await fetch(path);
+            const name = uniqueName("file." + mime2ext[response.headers.get("Content-Type")], files);
+            const blob = await response.blob();
+            files[name] = {
+              type: "binary",
+              data: await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.readAsBinaryString(blob);
+              })
+            };
+            return name;
+          } else {
+            const name = uniqueName(path.match(/[^\/\\]*$/)[0], files);
+            files[name] = {
+              type: "path",
+              data: path
+            };
+            return name;
+          }
+        } else if (file) {
+          const name = uniqueName(file.name, files);
+          files[name] = {
+            type: "binary",
+            data: await new Promise(resolve => {
+              const reader = new FileReader();
+              reader.onload = e => resolve(e.target.result);
+              reader.readAsBinaryString(file);
+            })
+          };
+          return name;
+        }
+      }
+
+      schedule.click(async function () {
+        const data = {
+          subreddit: $('#subreddit').val(),
+          title: $('#title').val(),
+          type: type.val()
+        };
+        const files = {};
+        switch (data.type) {
+          case "text":
+          case "post": {
+            const body = $('#body');
+            if (body.val()) {
+              data.body = body.val();
+            }
+          }
+            break;
+          case "image":
+            data.file = await handleFile(imagePath.val(), imageFile.prop("files")[0], files);
+            break;
+          case "gallery":
+          case "images":
+            data.images = await Promise.all(images.children().map(async function () {
+              const card = $(this);
+              const imageFile = card.find('.image-file');
+              const imagePath = card.find('.image-path');
+              const caption = card.find('.caption');
+              const link = card.find('.link');
+              const image = {};
+              image.file = await handleFile(imagePath.val(), imageFile.prop("files")[0], files);
+              if (caption.val()) {
+                image.caption = caption.val();
+              }
+              if (link.val()) {
+                image.link = link.val();
+              }
+              return image;
+            }));
+            break;
+          case "video":
+            data.file = await handleFile(videoPath.val(), videoFile.prop("files")[0], files);
+            data.gif = $('#gif').prop("checked");
+            break;
+          case "url":
+          case "link":
+            data.url = $('#url').val();
+            break;
+        }
+        data.oc = $('#oc').prop("checked");
+        data.spoiler = $('#spoiler').prop("checked");
+        data.nsfw = $('#nsfw').prop("checked");
+        const flair = $('#flair');
+        if (flair.val()) {
+          data.flair = flair.val();
+        }
+        const commentElems = comments.find('.comment');
+        if (commentElems.length) {
+          data.comments = [...commentElems.map(function () {
+            return $(this).val();
+          })];
+        }
+        if (window.saveData) {
+          window.saveData($('#dir').val(), data, files);
+        } else {
+          alert("Please open this page using `npm run schedule`.");
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+<div class="mb-3">
+  <label for="dir" class="form-label">Folder name</label>
+  <input type="text" class="form-control" id="dir"
+      placeholder="A string containing a time in the format YYYY-mm-dd HH-MM-SS">
+</div>
+<div class="mb-3">
+  <label for="subreddit" class="form-label">Subreddit</label>
+  <input type="text" class="form-control" id="subreddit" placeholder="r/subreddit or u/user">
+</div>
+<div class="mb-3">
+  <label for="title" class="form-label">Title</label>
+  <input type="text" class="form-control" id="title" placeholder="Title">
+</div>
+<input type="hidden" id="type" value="post">
+<ul class="nav nav-tabs" id="tabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="post-tab" data-bs-toggle="tab" data-bs-target="#post-tab-pane" type="button"
+        role="tab" aria-controls="post-tab-pane" aria-selected="true">Post
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="image-tab" data-bs-toggle="tab" data-bs-target="#image-tab-pane" type="button"
+        role="tab" aria-controls="image-tab-pane" aria-selected="false">Image
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="gallery-tab" data-bs-toggle="tab" data-bs-target="#gallery-tab-pane" type="button"
+        role="tab" aria-controls="gallery-tab-pane" aria-selected="false">Gallery
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-tab-pane" type="button"
+        role="tab" aria-controls="video-tab-pane" aria-selected="false">Video
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="link-tab" data-bs-toggle="tab" data-bs-target="#link-tab-pane" type="button"
+        role="tab" aria-controls="link-tab-pane" aria-selected="false">Link
+    </button>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="post-tab-pane" role="tabpanel" aria-labelledby="post-tab" tabindex="0">
+    <div class="mb-3">
+      <label for="body" class="form-label">Body</label>
+      <textarea class="form-control" id="body" rows="3" placeholder="Text (optional)"></textarea>
+    </div>
+  </div>
+  <div class="tab-pane fade" id="image-tab-pane" role="tabpanel" aria-labelledby="image-tab" tabindex="0">
+    <label for="image-path" class="form-label">Image (drag and drop and paste are supported)</label>
+    <div class="input-group mb-3" id="image">
+      <input type="file" class="form-control" id="image-file">
+      <span class="input-group-text">or</span>
+      <input type="text" class="form-control" aria-label="File URL or file path" id="image-path"
+          placeholder="/path/to/image.png or https://example.com/image.png">
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="card col-6 offset-3" id="image-card">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+             alt="image preview"
+             class="card-img" id="image-preview"/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tab-pane fade" id="gallery-tab-pane" role="tabpanel" aria-labelledby="gallery-tab" tabindex="0">
+    <label class="form-label">Images (drag and drop and paste are supported)</label>
+    <div class="btn-group w-100" role="group">
+      <button class="btn btn-primary" id="add-image">Add</button>
+      <button class="btn btn-primary" id="clear-images">Clear</button>
+    </div>
+    <div class="container-fluid">
+      <div class="row flex-nowrap overflow-auto" id="images"></div>
+    </div>
+  </div>
+  <div class="tab-pane fade" id="video-tab-pane" role="tabpanel" aria-labelledby="video-tab" tabindex="0">
+    <label for="image-path" class="form-label">Image (drag and drop and paste are supported)</label>
+    <div class="input-group mb-3" id="video">
+      <input type="file" class="form-control" id="video-file">
+      <span class="input-group-text">or</span>
+      <input type="text" class="form-control" aria-label="File URL or file path" id="video-path"
+          placeholder="/path/to/image.png or https://example.com/image.png">
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="card col-6 offset-3" id="video-card">
+          <video src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+              class="card-img" id="video-preview" controls></video>
+          <div class="card-footer">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="gif">
+              <label class="form-check-label" for="gif">Convert to GIF</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tab-pane fade" id="link-tab-pane" role="tabpanel" aria-labelledby="link-tab" tabindex="0">
+    <div class="mb-3">
+      <label for="url" class="form-label">URL</label>
+      <input type="text" class="form-control" id="url" placeholder="https://example.com">
+    </div>
+  </div>
+</div>
+<label class="form-label">Comments</label>
+<div class="btn-group w-100" role="group">
+  <button class="btn btn-primary" id="add-comment">Add</button>
+  <button class="btn btn-primary" id="clear-comments">Clear</button>
+</div>
+<label class="form-label"></label>
+<div id="comments"></div>
+<label class="form-label">Flags and Flairs</label>
+<div class="input-group mb-3">
+  <span class="input-group-text">Flags</span>
+  <input type="checkbox" class="btn-check" id="oc" autocomplete="off">
+  <label class="btn" for="oc">OC</label>
+  <input type="checkbox" class="btn-check" id="spoiler" autocomplete="off">
+  <label class="btn" for="spoiler">Spoiler</label>
+  <input type="checkbox" class="btn-check" id="nsfw" autocomplete="off">
+  <label class="btn" for="nsfw">NSFW</label>
+  <span class="input-group-text">Flair</span>
+  <input type="text" class="form-control" aria-label="flair" placeholder="flair" id="flair">
+  <button class="btn btn-primary" type="button" id="schedule">Schedule</button>
+</div>
+</body>
+</html>
