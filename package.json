@@ -23,7 +23,6 @@
   "author": "tigeryu8900",
   "license": "ISC",
   "dependencies": {
-    "clipboardy": "^4.0.0",
     "dotenv": "^16.4.1",
     "puppeteer": "^21.9.0"
   }
