@@ -24,7 +24,6 @@ async function saveDataBase(dir, data, files) {
 }
 
 (async () => {
-  // console.log(userDataDir);
   const browser = await puppeteer.launch({
     headless: false,
     protocolTimeout: 0,
@@ -35,10 +34,6 @@ async function saveDataBase(dir, data, files) {
     userDataDir
   });
   const page = await browser.newPage();
-  // await page.setViewport({
-  //   width: 0,
-  //   height: 0
-  // });
   await page.goto("file://" + path.resolve("schedule.html").replaceAll(path.delimiter, "/"));
   await page.exposeFunction("saveDataBase", saveDataBase);
   await page.evaluate(async () => await new Promise(resolve => {
