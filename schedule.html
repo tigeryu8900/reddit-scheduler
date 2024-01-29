@@ -212,8 +212,10 @@
         e.stopPropagation();
         $(this).removeClass("dragging");
       });
-      $(document.documentElement).on("drop dragdrop paste", e => {
-        for (let item of e.originalEvent.dataTransfer?.items ?? e.originalEvent.clipboardData?.items) {
+
+      function itemsHandler(items) {
+        let handled = false;
+        for (let item of items) {
           switch (item.kind) {
             case "string":
               switch (item.type) {
@@ -221,15 +223,28 @@
                 case "text/plain":
                 case "text/uri-list":
                   item.getAsString(uris => uris.split('\n').forEach(pathHandlers[type.val()]));
-                  e.preventDefault();
+                  handled = true;
                   break;
               }
               break;
             case "file":
               fileHandlers[type.val()](item.getAsFile());
-              e.preventDefault();
+              handled = true;
               break;
           }
+        }
+        return handled;
+      }
+
+      $(document.documentElement).on("drop dragdrop paste", function eventListener(e) {
+        const items = e.originalEvent.dataTransfer?.items ?? e.originalEvent.clipboardData?.items;
+        if (e.type === "paste") {
+          if (!$(e.target).is('input:not([type="file"])') && itemsHandler(items)) {
+            e.preventDefault();
+          }
+        } else {
+          itemsHandler(items);
+          e.preventDefault();
         }
       });
 
@@ -528,7 +543,7 @@
 <div class="mb-3">
   <label for="dir" class="form-label">Folder name</label>
   <input type="text" class="form-control" id="dir"
-      placeholder="A string containing a time in the format YYYY-mm-dd HH-MM-SS">
+         placeholder="A string containing a time in the format YYYY-mm-dd HH-MM-SS">
 </div>
 <div class="mb-3">
   <label for="subreddit" class="form-label">Subreddit</label>
