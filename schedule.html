@@ -524,6 +524,10 @@
         if (flair.val()) {
           data.flair = flair.val();
         }
+        const retries = $('#retries');
+        if (retries.val()) {
+          data.maxRetries = retries.val();
+        }
         const commentElems = comments.find('.comment');
         if (commentElems.length) {
           data.comments = [...commentElems.map(function () {
@@ -553,6 +557,10 @@
   <div class="mb-3">
     <label for="title" class="form-label">Title</label>
     <input name="title" type="text" class="form-control" id="title" placeholder="Title">
+  </div>
+  <div class="mb-3">
+    <label for="retries" class="form-label">Max Retries</label>
+    <input name="retries" type="number" class="form-control" min="0" step="1" value="0" id="retries" placeholder="0">
   </div>
   <input name="type" type="hidden" id="type" value="post">
   <ul class="nav nav-tabs" id="tabs" role="tablist">
