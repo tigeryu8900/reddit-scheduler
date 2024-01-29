@@ -72,18 +72,18 @@
                  class="card-img-top image-preview" alt="image preview">
             <div class="card-body">
               <div class="input-group mb-3">
-                <input type="file" class="form-control image-file">
+                <input name="image-file" type="file" class="form-control image-file">
               </div>
               <div class="input-group mb-3">
                 <span class="input-group-text">or</span>
-                <input type="text" class="form-control image-path" aria-label="File URL or file path"
+                <input name="image-path" type="text" class="form-control image-path" aria-label="File URL or file path"
                        placeholder="/path/to/image.png or https://example.com/image.png">
               </div>
               <div class="input-group mb-3">
-                <input type="text" class="form-control caption" aria-label="Caption" placeholder="Caption">
+                <input name="caption" type="text" class="form-control caption" aria-label="Caption" placeholder="Caption">
               </div>
               <div class="input-group mb-3">
-                <input type="text" class="form-control link" aria-label="Link" placeholder="Link">
+                <input name="link" type="text" class="form-control link" aria-label="Link" placeholder="Link">
               </div>
             </div>
             <div class="card-footer">
@@ -252,7 +252,7 @@
         const comment = $(String.raw`
           <div class="input-group mb-3" id="image">
             <span class="input-group-text">Comment</span>
-            <input type="text" class="form-control comment" aria-label="Comment" placeholder="Comment">
+            <input name="comment" type="text" class="form-control comment" aria-label="Comment" placeholder="Comment">
             <button class="btn btn-primary add-above" type="button">Add above</button>
             <button class="btn btn-primary add-below" type="button">Add below</button>
             <button class="btn btn-primary delete" type="button">Delete</button>
@@ -542,18 +542,18 @@
 <body>
 <div class="mb-3">
   <label for="dir" class="form-label">Folder name</label>
-  <input type="text" class="form-control" id="dir"
+  <input name="dir" type="text" class="form-control" id="dir"
          placeholder="A string containing a time in the format YYYY-mm-dd HH-MM-SS">
 </div>
 <div class="mb-3">
   <label for="subreddit" class="form-label">Subreddit</label>
-  <input type="text" class="form-control" id="subreddit" placeholder="r/subreddit or u/user">
+  <input name="subreddit" type="text" class="form-control" id="subreddit" placeholder="r/subreddit or u/user">
 </div>
 <div class="mb-3">
   <label for="title" class="form-label">Title</label>
-  <input type="text" class="form-control" id="title" placeholder="Title">
+  <input name="title" type="text" class="form-control" id="title" placeholder="Title">
 </div>
-<input type="hidden" id="type" value="post">
+<input name="type" type="hidden" id="type" value="post">
 <ul class="nav nav-tabs" id="tabs" role="tablist">
   <li class="nav-item" role="presentation">
     <button class="nav-link active" id="post-tab" data-bs-toggle="tab" data-bs-target="#post-tab-pane" type="button"
@@ -591,9 +591,9 @@
   <div class="tab-pane fade" id="image-tab-pane" role="tabpanel" aria-labelledby="image-tab" tabindex="0">
     <label for="image-path" class="form-label">Image (drag and drop and paste are supported)</label>
     <div class="input-group mb-3" id="image">
-      <input type="file" class="form-control" id="image-file">
+      <input name="image-file" type="file" class="form-control" id="image-file">
       <span class="input-group-text">or</span>
-      <input type="text" class="form-control" aria-label="File URL or file path" id="image-path"
+      <input name="image-path" type="text" class="form-control" aria-label="File URL or file path" id="image-path"
              placeholder="/path/to/image.png or https://example.com/image.png">
     </div>
     <div class="container">
@@ -619,9 +619,9 @@
   <div class="tab-pane fade" id="video-tab-pane" role="tabpanel" aria-labelledby="video-tab" tabindex="0">
     <label for="image-path" class="form-label">Image (drag and drop and paste are supported)</label>
     <div class="input-group mb-3" id="video">
-      <input type="file" class="form-control" id="video-file">
+      <input name="video-file" type="file" class="form-control" id="video-file">
       <span class="input-group-text">or</span>
-      <input type="text" class="form-control" aria-label="File URL or file path" id="video-path"
+      <input name=video-path" type="text" class="form-control" aria-label="File URL or file path" id="video-path"
              placeholder="/path/to/image.png or https://example.com/image.png">
     </div>
     <div class="container">
@@ -631,7 +631,7 @@
                  class="card-img" id="video-preview" controls></video>
           <div class="card-footer">
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="gif">
+              <input name="gif" class="form-check-input" type="checkbox" role="switch" id="gif">
               <label class="form-check-label" for="gif">Convert to GIF</label>
             </div>
           </div>
@@ -642,7 +642,7 @@
   <div class="tab-pane fade" id="link-tab-pane" role="tabpanel" aria-labelledby="link-tab" tabindex="0">
     <div class="mb-3">
       <label for="url" class="form-label">URL</label>
-      <input type="text" class="form-control" id="url" placeholder="https://example.com">
+      <input name="url" type="text" class="form-control" id="url" placeholder="https://example.com">
     </div>
   </div>
 </div>
@@ -656,14 +656,14 @@
 <label class="form-label">Flags and Flairs</label>
 <div class="input-group mb-3">
   <span class="input-group-text">Flags</span>
-  <input type="checkbox" class="btn-check" id="oc" autocomplete="off">
+  <input name="oc" type="checkbox" class="btn-check" id="oc" autocomplete="off">
   <label class="btn" for="oc">OC</label>
-  <input type="checkbox" class="btn-check" id="spoiler" autocomplete="off">
+  <input name="spoiler" type="checkbox" class="btn-check" id="spoiler" autocomplete="off">
   <label class="btn" for="spoiler">Spoiler</label>
-  <input type="checkbox" class="btn-check" id="nsfw" autocomplete="off">
+  <input name="nsfw" type="checkbox" class="btn-check" id="nsfw" autocomplete="off">
   <label class="btn" for="nsfw">NSFW</label>
   <span class="input-group-text">Flair</span>
-  <input type="text" class="form-control" aria-label="flair" placeholder="flair" id="flair">
+  <input name="flair" type="text" class="form-control" aria-label="flair" placeholder="flair" id="flair">
   <button class="btn btn-primary" type="button" id="schedule">Schedule</button>
 </div>
 </body>
