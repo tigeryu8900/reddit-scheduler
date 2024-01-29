@@ -24,7 +24,8 @@ async function saveDataBase(dir, data, files) {
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: false
+    headless: false,
+    protocolTimeout: 0
   });
   const page = await browser.newPage();
   await page.goto("file://" + path.resolve("schedule.html").replaceAll(path.delimiter, "/"));
