@@ -152,54 +152,47 @@
       videoFile.on("change", updateVideoSrc);
       videoPath.on("change", updateVideoSrc);
 
+      function updateFileInput(fileInput, pathInput, file) {
+        fileInput.val("");
+        pathInput.val("");
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.prop("files", dataTransfer.files);
+        fileInput.trigger("change");
+      }
+      function updatePathInput(fileInput, pathInput, path) {
+        fileInput.val("");
+        pathInput.val(path);
+        pathInput.trigger("change");
+      }
       const pathHandlers = {
         post() {
         },
-        image(str) {
-          imageFile.val("");
-          imagePath.val(str);
-          updateImageSrc();
+        image(path) {
+          updatePathInput(imageFile, imagePath, path);
         },
-        gallery(str) {
+        gallery(path) {
           const card = createGalleryCard();
-          const imagePath = card.find('.image-path');
-          imagePath.val(str);
           images.append(card);
-          imagePath.trigger("change");
+          updatePathInput(card.find('.image-file'), card.find('.image-path'), path);
         },
-        video(str) {
-          videoFile.val("");
-          videoPath.val(str);
-          updateVideoSrc();
+        video(path) {
+          updatePathInput(videoFile, videoPath, path);
         }
       };
       const fileHandlers = {
         post() {
         },
         image(file) {
-          imagePath.val("");
-          imageFile.val("");
-          const dataTransfer = new DataTransfer();
-          dataTransfer.items.add(file);
-          imageFile.prop("files", dataTransfer.files);
-          updateImageSrc();
+          updateFileInput(imageFile, imagePath, file);
         },
         gallery(file) {
           const card = createGalleryCard();
-          const imageFile = card.find('.image-file');
-          const dataTransfer = new DataTransfer();
-          dataTransfer.items.add(file);
-          imageFile.prop("files", dataTransfer.files);
           images.append(card);
-          imageFile.trigger("change");
+          updateFileInput(card.find('.image-file'), card.find('.image-path'), file);
         },
         video(file) {
-          videoPath.val("");
-          videoFile.val("");
-          const dataTransfer = new DataTransfer();
-          dataTransfer.items.add(file);
-          videoFile.prop("files", dataTransfer.files);
-          updateVideoSrc();
+          updateFileInput(videoFile, videoPath, file);
         }
       };
       $(document.documentElement).on("dragover", function (e) {
@@ -213,24 +206,29 @@
         $(this).removeClass("dragging");
       });
 
+      function itemHandler(item, urisHandler, fileHandler) {
+        switch (item.kind) {
+          case "string":
+            switch (item.type) {
+              case "text":
+              case "text/plain":
+              case "text/uri-list":
+                item.getAsString(urisHandler);
+                return true;
+            }
+            break;
+          case "file":
+            fileHandler(item.getAsFile());
+            return true;
+        }
+        return false;
+      }
+
       function itemsHandler(items) {
         let handled = false;
         for (let item of items) {
-          switch (item.kind) {
-            case "string":
-              switch (item.type) {
-                case "text":
-                case "text/plain":
-                case "text/uri-list":
-                  item.getAsString(uris => uris.split('\n').forEach(pathHandlers[type.val()]));
-                  handled = true;
-                  break;
-              }
-              break;
-            case "file":
-              fileHandlers[type.val()](item.getAsFile());
-              handled = true;
-              break;
+          if (itemHandler(item, uris => uris.split('\n').forEach(pathHandlers[type.val()]), fileHandlers[type.val()])) {
+            handled = true;
           }
         }
         return handled;
@@ -238,8 +236,20 @@
 
       $(document.documentElement).on("drop dragdrop paste", function eventListener(e) {
         const items = e.originalEvent.dataTransfer?.items ?? e.originalEvent.clipboardData?.items;
-        if (e.type === "paste") {
-          if (!$(e.target).is('input:not([type="file"])') && itemsHandler(items)) {
+        const target = $(e.target);
+        if (target.is('img, video')) {
+          const item = items[0];
+          const ancestor = target.closest(':has(input[type="file"]):has(input[id$="path"])');
+          const fileInput = ancestor.find('input[type="file"]');
+          const pathInput = ancestor.find('input[id$="path"]');
+          fileInput.val("");
+          pathInput.val("");
+          if (itemHandler(item, uris => updatePathInput(fileInput, pathInput, uris.split('\n', 1)[0]),
+                  file => updateFileInput(fileInput, pathInput, file))) {
+            e.preventDefault();
+          }
+        } else if (e.type === "paste") {
+          if (!target.is('input:not([type="file"])') && itemsHandler(items)) {
             e.preventDefault();
           }
         } else {
