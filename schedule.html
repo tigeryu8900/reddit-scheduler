@@ -6,6 +6,8 @@
   <title>Schedule Post</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
           integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
           crossorigin="anonymous"></script>
@@ -88,9 +90,17 @@
             </div>
             <div class="card-footer">
               <div class="btn-group w-100" role="group">
-                <button class="btn btn-primary add-left">Add left</button>
-                <button class="btn btn-primary delete">Delete</button>
-                <button class="btn btn-primary add-right">Add right</button>
+                <button class="btn btn-primary left"><i class="bi bi-arrow-left"></i></button>
+                <button class="btn btn-primary add-left">
+                  <i class="bi bi-arrow-left"></i>
+                  <i class="bi bi-plus-square"></i>
+                </button>
+                <button class="btn btn-primary delete"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-primary add-right">
+                  <i class="bi bi-plus-square"></i>
+                  <i class="bi bi-arrow-right"></i>
+                </button>
+                <button class="btn btn-primary right"><i class="bi bi-arrow-right"></i></button>
               </div>
             </div>
           </div>
@@ -263,9 +273,17 @@
           <div class="input-group mb-3" id="image">
             <span class="input-group-text">Comment</span>
             <textarea name="comment" class="form-control comment" aria-label="Comment" placeholder="Comment"></textarea>
-            <button class="btn btn-primary add-above" type="button">Add above</button>
-            <button class="btn btn-primary add-below" type="button">Add below</button>
-            <button class="btn btn-primary delete" type="button">Delete</button>
+            <button class="btn btn-primary up" type="button"><i class="bi bi-arrow-up"></i></button>
+            <button class="btn btn-primary down" type="button"><i class="bi bi-arrow-down"></i></button>
+            <button class="btn btn-primary add-above" type="button">
+              <i class="bi bi-plus-square"></i>
+              <i class="bi bi-arrow-up"></i>
+            </button>
+            <button class="btn btn-primary add-below" type="button">
+              <i class="bi bi-plus-square"></i>
+              <i class="bi bi-arrow-down"></i>
+            </button>
+            <button class="btn btn-primary delete" type="button"><i class="bi bi-trash"></i></button>
           </div>
         `);
         comment.find('.add-above').click(function () {
@@ -628,8 +646,8 @@
     <div class="tab-pane fade" id="gallery-tab-pane" role="tabpanel" aria-labelledby="gallery-tab" tabindex="0">
       <label class="form-label">Images (drag and drop and paste are supported)</label>
       <div class="btn-group w-100" role="group">
-        <button class="btn btn-primary" id="add-image">Add</button>
-        <button class="btn btn-primary" id="clear-images">Clear</button>
+        <button class="btn btn-primary" id="add-image"><i class="bi bi-plus-square"></i></button>
+        <button class="btn btn-primary" id="clear-images"><i class="bi bi-x-square"></i></button>
       </div>
       <div class="container-fluid">
         <div class="row flex-nowrap overflow-auto" id="images"></div>
@@ -667,8 +685,8 @@
   </div>
   <label class="form-label">Comments</label>
   <div class="btn-group w-100" role="group">
-    <button class="btn btn-primary" id="add-comment">Add</button>
-    <button class="btn btn-primary" id="clear-comments">Clear</button>
+    <button class="btn btn-primary" id="add-comment"><i class="bi bi-plus-square"></i></button>
+    <button class="btn btn-primary" id="clear-comments"><i class="bi bi-x-square"></i></button>
   </div>
   <label class="form-label"></label>
   <div id="comments"></div>
