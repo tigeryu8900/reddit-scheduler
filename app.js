@@ -197,6 +197,14 @@ async function exit(signal) {
   await fs.access(pidDir).then(async () => {
     process.kill(parseInt((await fs.readFile(pidDir)).toString()));
     console.log("Another instance is running, stopping that instance");
+    await new Promise(async resolve => {
+      while (await fs.access(pidDir).then(() => false, () => {
+        resolve();
+        return true;
+      })) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    });
   }, () => {}).catch(() => {
     console.log("Previous instance crashed. You should check the logs.");
   });
