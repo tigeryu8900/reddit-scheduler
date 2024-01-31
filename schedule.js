@@ -3,12 +3,14 @@ import puppeteer from "puppeteer";
 import * as path from "path";
 import os from "os";
 import fs from "fs/promises";
+import * as crypto from "crypto";
 
 const pendingDir = path.join(os.homedir(), ".reddit", "pending");
 const userDataDir = path.join(os.homedir(), ".reddit", "Scheduler User Data");
 
 async function saveDataBase(dir, data, files) {
-  await fs.mkdir(path.join(pendingDir, dir));
+  const tmpdir = path.join(os.tmpdir(), crypto.randomUUID());
+  await fs.mkdir(tmpdir, {recursive: true});
   for (const name in files) {
     const file = files[name];
     switch (file.type) {
@@ -16,11 +18,12 @@ async function saveDataBase(dir, data, files) {
         await fs.symlink(file.data.replaceAll("/", path.sep), path.join(pendingDir, dir, name));
         break;
       case "binary":
-        await fs.writeFile(path.join(pendingDir, dir, name), Buffer.from(file.data, "binary"));
+        await fs.writeFile(path.join(tmpdir, name), Buffer.from(file.data, "binary"));
         break;
     }
   }
-  await fs.writeFile(path.join(pendingDir, dir, "data.json"), JSON.stringify(data, null, 2));
+  await fs.writeFile(path.join(tmpdir, "data.json"), JSON.stringify(data, null, 2));
+  await fs.rename(tmpdir, path.join(pendingDir, dir));
 }
 
 (async () => {
