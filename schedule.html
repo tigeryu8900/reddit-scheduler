@@ -109,9 +109,6 @@
         const imageFile = card.find('.image-file');
         const imagePath = card.find('.image-path');
         const imagePreview = card.find('.image-preview');
-        const addLeft = card.find('.add-left');
-        const del = card.find('.delete');
-        const addRight = card.find('.add-right');
 
         function updateImageSrc() {
           if (imagePath.val().length) {
@@ -127,14 +124,20 @@
         imageFile.on("change", updateImageSrc);
         imagePath.on("change", updateImageSrc);
 
-        addLeft.click(function () {
+        card.find('.left').click(function () {
+          card.insertBefore(card.prev());
+        });
+        card.find('.add-left').click(function () {
           card.before(createGalleryCard());
         });
-        del.click(function () {
+        card.find('.delete').click(function () {
           card.remove();
         })
-        addRight.click(function () {
+        card.find('.add-right').click(function () {
           card.after(createGalleryCard());
+        });
+        card.find('.right').click(function () {
+          card.insertAfter(card.next());
         });
 
         return card;
@@ -272,7 +275,7 @@
         const comment = $(String.raw`
           <div class="input-group mb-3" id="image">
             <span class="input-group-text">Comment</span>
-            <textarea name="comment" class="form-control comment" aria-label="Comment" placeholder="Comment"></textarea>
+            <div class="form-control comment" aria-label="Comment" contenteditable="true"></div>
             <button class="btn btn-primary up" type="button"><i class="bi bi-arrow-up"></i></button>
             <button class="btn btn-primary down" type="button"><i class="bi bi-arrow-down"></i></button>
             <button class="btn btn-primary add-above" type="button">
@@ -286,6 +289,12 @@
             <button class="btn btn-primary delete" type="button"><i class="bi bi-trash"></i></button>
           </div>
         `);
+        comment.find('.up').click(function () {
+          comment.insertBefore(comment.prev());
+        });
+        comment.find('.down').click(function () {
+          comment.insertAfter(comment.next());
+        });
         comment.find('.add-above').click(function () {
           comment.before(createComment());
         });
@@ -559,7 +568,7 @@
         const commentElems = comments.find('.comment');
         if (commentElems.length) {
           data.comments = [...commentElems.map(function () {
-            return $(this).val();
+            return $(this).prop("innerText");
           })];
         }
         if (window.saveData) {
