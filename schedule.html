@@ -543,7 +543,7 @@
                 image.link = link.val();
               }
               return image;
-            }));
+            }).filter(image => image.file));
             break;
           case "video":
             data.file = await handleFile(videoPath.val(), videoFile.prop("files")[0], files);
@@ -569,7 +569,7 @@
         if (commentElems.length) {
           data.comments = [...commentElems.map(function () {
             return $(this).prop("innerText");
-          })];
+          })].filter(comment => /\S/.test(comment));
         }
         if (window.saveData) {
           window.saveData($('#dir').val(), data, files);
