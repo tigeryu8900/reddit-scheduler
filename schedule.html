@@ -262,7 +262,7 @@
             e.preventDefault();
           }
         } else if (e.type === "paste") {
-          if (!target.is('input:not([type="file"])') && itemsHandler(items)) {
+          if (!target.is('input:not([type="file"]), textarea, div[contenteditable="true"]') && itemsHandler(items)) {
             e.preventDefault();
           }
         } else {
