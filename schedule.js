@@ -15,7 +15,7 @@ async function saveDataBase(dir, data, files) {
     const file = files[name];
     switch (file.type) {
       case "path":
-        await fs.symlink(file.data.replaceAll("/", path.sep), path.join(pendingDir, dir, name));
+        await fs.symlink(file.data.replaceAll("/", path.sep), path.join(tmpdir, name));
         break;
       case "binary":
         await fs.writeFile(path.join(tmpdir, name), Buffer.from(file.data, "binary"));
