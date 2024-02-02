@@ -18,8 +18,8 @@ async function post(browser, dir) {
   console.log(dir, "Starting");
   running.add(dir);
   const data = JSON.parse((await fs.readFile(path.join(pendingDir, dir, "data.json"))).toString());
-  console.log(dir, "Starting Puppeteer");
   for (let i = 0; i < (data.maxRetries || 0) + 1; ++i) {
+    console.log(dir, "Opening page");
     const page = await browser.newPage();
     try {
       await page.setUserAgent((await browser.userAgent()).replace(/headless/gi, ""));
