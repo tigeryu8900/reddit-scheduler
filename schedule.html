@@ -27,6 +27,7 @@
       const videoFile = $('#video-file');
       const videoPath = $('#video-path');
       const videoPreview = $('#video-preview');
+      const thumbnail = $('#thumbnail');
       const schedule = $('#schedule');
       const comments = $('#comments');
       const addComment = $('#add-comment');
@@ -164,6 +165,10 @@
 
       videoFile.on("change", updateVideoSrc);
       videoPath.on("change", updateVideoSrc);
+
+      thumbnail.on("change", function () {
+        videoPreview.prop("currentTime", videoPreview.prop("duration") * parseInt(thumbnail.val()) / 10);
+      });
 
       function updateFileInput(fileInput, pathInput, file) {
         fileInput.val("");
@@ -548,6 +553,7 @@
           case "video":
             data.file = await handleFile(videoPath.val(), videoFile.prop("files")[0], files);
             data.gif = $('#gif').prop("checked");
+            data.thumbnail = thumbnail.val();
             break;
           case "url":
           case "link":
@@ -679,6 +685,11 @@
               <div class="form-check form-switch">
                 <input name="gif" class="form-check-input" type="checkbox" role="switch" id="gif">
                 <label class="form-check-label" for="gif">Convert to GIF</label>
+              </div>
+              <div class="input-group mb-3">
+                <label for="thumbnail" class="input-group-text">Thumbnail</label>
+                <input name="thumbnail" type="number" class="form-control" min="0" max="10" step="1" value="0"
+                       id="thumbnail" placeholder="0">
               </div>
             </div>
           </div>
