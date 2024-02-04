@@ -167,7 +167,7 @@
       videoPath.on("change", updateVideoSrc);
 
       thumbnail.on("change", function () {
-        videoPreview.prop("currentTime", videoPreview.prop("duration") * parseInt(thumbnail.val()) / 10);
+        videoPreview.prop("currentTime", videoPreview.prop("duration") * (parseInt(thumbnail.val()) - 1) / 9);
       });
 
       function updateFileInput(fileInput, pathInput, file) {
@@ -688,7 +688,7 @@
               </div>
               <div class="input-group mb-3">
                 <label for="thumbnail" class="input-group-text">Thumbnail</label>
-                <input name="thumbnail" type="number" class="form-control" min="0" max="10" step="1" value="0"
+                <input name="thumbnail" type="number" class="form-control" min="1" max="10" step="1" value="1"
                        id="thumbnail" placeholder="0">
               </div>
             </div>
