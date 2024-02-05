@@ -533,7 +533,7 @@
             break;
           case "gallery":
           case "images":
-            data.images = await Promise.all(images.children().map(async function () {
+            data.images = await Promise.all(images.children().filter(image => image.file).map(async function () {
               const card = $(this);
               const imageFile = card.find('.image-file');
               const imagePath = card.find('.image-path');
@@ -548,7 +548,7 @@
                 image.link = link.val();
               }
               return image;
-            }).filter(image => image.file));
+            }));
             break;
           case "video":
             data.file = await handleFile(videoPath.val(), videoFile.prop("files")[0], files);
