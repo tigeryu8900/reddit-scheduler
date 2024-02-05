@@ -18,6 +18,7 @@ async function post(browser, dir) {
   console.log(dir, "Starting");
   running.add(dir);
   const data = JSON.parse((await fs.readFile(path.join(pendingDir, dir, "data.json"))).toString());
+  let success = false;
   for (let i = 0; i < (data.maxRetries || 0) + 1; ++i) {
     console.log(dir, "Opening page");
     const page = await browser.newPage();
@@ -146,16 +147,16 @@ async function post(browser, dir) {
           await page.waitForNetworkIdle();
         }
       }
-      await fs.rename(path.join(pendingDir, dir), path.join(doneDir, dir));
+      success = true;
       console.log(dir, "Posted", page.url(), data);
       break;
     } catch (e) {
-      await fs.rename(path.join(pendingDir, dir), path.join(failedDir, dir));
       console.error(dir, "Error", data, e);
     } finally {
       await page.close();
     }
   }
+  await fs.rename(path.join(pendingDir, dir), path.join(success ? doneDir : failedDir, dir));
   running.delete(dir);
 }
 
