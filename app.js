@@ -201,9 +201,9 @@ async function exit(signal) {
     process.kill(parseInt((await fs.readFile(pidDir)).toString()));
     console.log("Another instance is running, stopping that instance");
     await new Promise(async resolve => {
-      while (await fs.access(pidDir).then(() => false, () => {
+      while (await fs.access(pidDir).then(() => true, () => {
         resolve();
-        return true;
+        return false;
       })) {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
