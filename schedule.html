@@ -569,7 +569,7 @@
         }
         const retries = $('#retries');
         if (retries.val()) {
-          data.maxRetries = retries.val();
+          data.maxRetries = parseInt(retries.val());
         }
         const commentElems = comments.find('.comment');
         if (commentElems.length) {
