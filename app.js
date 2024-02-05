@@ -71,16 +71,18 @@ async function post(browser, dir) {
             }
             divs = await page.$$('div[draggable="true"]:has([style*="background-image"])');
           }
-          await divs[0].click();
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          for (let i = data.images.length - 1; i >= 0; --i) {
-            await divs[i].click();
+          if (data.images.some(({caption, link}) => caption || link)) {
+            await divs[0].click();
             await new Promise(resolve => setTimeout(resolve, 1000));
-            if (data.images[i].caption) {
-              await page.type('[placeholder="Add a caption..."]', data.images[i].caption);
-            }
-            if (data.images[i].link) {
-              await page.type('[placeholder="Add a link..."]', data.images[i].link);
+            for (let i = data.images.length - 1; i >= 0; --i) {
+              await divs[i].click();
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              if (data.images[i].caption) {
+                await page.type('[placeholder="Add a caption..."]', data.images[i].caption);
+              }
+              if (data.images[i].link) {
+                await page.type('[placeholder="Add a link..."]', data.images[i].link);
+              }
             }
           }
         }
