@@ -229,6 +229,7 @@ async function exit(signal) {
         return (prop in obj) ? obj[prop] : prop;
       }
     })[process.env.HEADLESS],
+    pipe: true,
     userDataDir
   });
   for (let event of ["SIGHUP", "SIGINT", "SIGTERM", "uncaughtException", "unhandledRejection"]) {
