@@ -147,6 +147,7 @@ async function post(browser, dir) {
           await page.type('[placeholder="What are your thoughts?"]', comment);
           await page.click('[type="submit"]');
           await page.waitForNetworkIdle();
+          await new Promise(resolve => setTimeout(resolve, 5000));
         }
       }
       success = true;
