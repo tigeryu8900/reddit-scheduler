@@ -173,7 +173,7 @@ function schedule(browser, dir, retry = false) {
       console.log(dir, "Scheduled");
     }
   } catch (e) {
-    console.error(e);
+    console.error(dir, e);
   }
 }
 
@@ -190,7 +190,7 @@ async function scheduleAll(browser, retry = false) {
 }
 
 async function exit(signal) {
-  console.log(signal, "received, quitting");
+  console.log(process.pid, signal, "received, quitting");
   await this.close();
   await fs.rm(pidDir);
   process.exit();
@@ -200,7 +200,7 @@ async function exit(signal) {
   await fs.mkdir(ctxDir, {recursive: true}).catch(() => {});
   await fs.access(pidDir).then(async () => {
     process.kill(parseInt((await fs.readFile(pidDir)).toString()));
-    console.log("Another instance is running, stopping that instance");
+    console.log(process.pid, "Another instance is running, stopping that instance");
     await new Promise(async resolve => {
       while (await fs.access(pidDir).then(() => true, () => {
         resolve();
@@ -210,10 +210,10 @@ async function exit(signal) {
       }
     });
   }, () => {}).catch(() => {
-    console.log("Previous instance crashed. You should check the logs.");
+    console.log(process.pid, "Previous instance crashed. You should check the logs.");
   });
   await fs.writeFile(pidDir, process.pid.toString());
-  console.log("Starting", Date());
+  console.log(process.pid, "Starting", Date());
   await fs.mkdir(userDataDir, {recursive: true}).catch(() => {});
   await fs.mkdir(pendingDir, {recursive: true}).catch(() => {});
   await fs.mkdir(failedDir, {recursive: true}).catch(() => {});
@@ -238,16 +238,16 @@ async function exit(signal) {
   }
   const page = await browser.newPage();
   await page.setUserAgent((await browser.userAgent()).replace(/headless/gi, ""));
-  console.log("Signing in");
+  console.log(process.pid, "Signing in");
   await page.goto("https://www.reddit.com/login/");
   try {
     await page.type('#loginUsername', process.env.USERNAME);
     await page.type('#loginPassword', process.env.PASSWORD);
     await page.click('.AnimatedForm [type="submit"]');
     await page.waitForNetworkIdle();
-    console.log("Signed in");
+    console.log(process.pid, "Signed in");
   } catch (e) {
-    console.log("Skipping sign in");
+    console.log(process.pid, "Skipping sign in");
   }
   await page.close();
   await scheduleAll(browser);
@@ -258,7 +258,7 @@ async function exit(signal) {
         if (event.filename === "reschedule") {
           if (await new Promise(resolve => fs.access(filepath)
             .then(() => resolve(true), () => resolve(false)))) {
-            console.log("Rescheduling");
+            console.log(process.pid, "Rescheduling");
             await fs.rm(filepath).catch(() => fs.rmdir(filepath));
             await scheduleAll(browser, true);
           }
@@ -267,7 +267,7 @@ async function exit(signal) {
         }
       }
     } catch (e) {
-      console.error(event.filename, e);
+      console.error(process.pid, event.filename, e);
     }
   }
 })();
