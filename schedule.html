@@ -32,12 +32,15 @@
       const comments = $('#comments');
       const addComment = $('#add-comment');
       const clearComments = $('#clear-comments');
+      const submitModal = $('#submit-modal');
+      const doneModal = $('#done-modal');
+      const wrongOpenModal = $('#wrong-open-modal');
 
-      $('#post-tab').click(() => type.val("post"));
-      $('#image-tab').click(() => type.val("image"));
-      $('#gallery-tab').click(() => type.val("gallery"));
-      $('#video-tab').click(() => type.val("video"));
-      $('#link-tab').click(() => type.val("link"));
+      $('#post-tab').on("click", () => type.val("post"));
+      $('#image-tab').on("click", () => type.val("image"));
+      $('#gallery-tab').on("click", () => type.val("gallery"));
+      $('#video-tab').on("click", () => type.val("video"));
+      $('#link-tab').on("click", () => type.val("link"));
 
       const date = new Date();
       $('#dir').val(`${
@@ -125,30 +128,30 @@
         imageFile.on("change", updateImageSrc);
         imagePath.on("change", updateImageSrc);
 
-        card.find('.left').click(function () {
+        card.find('.left').on("click", function () {
           card.insertBefore(card.prev());
         });
-        card.find('.add-left').click(function () {
+        card.find('.add-left').on("click", function () {
           card.before(createGalleryCard());
         });
-        card.find('.delete').click(function () {
+        card.find('.delete').on("click", function () {
           card.remove();
         })
-        card.find('.add-right').click(function () {
+        card.find('.add-right').on("click", function () {
           card.after(createGalleryCard());
         });
-        card.find('.right').click(function () {
+        card.find('.right').on("click", function () {
           card.insertAfter(card.next());
         });
 
         return card;
       }
 
-      addImage.click(function () {
+      addImage.on("click", function () {
         images.append(createGalleryCard());
       });
 
-      clearImages.click(function () {
+      clearImages.on("click", function () {
         images.empty();
       });
 
@@ -294,29 +297,29 @@
             <button class="btn btn-primary delete" type="button"><i class="bi bi-trash"></i></button>
           </div>
         `);
-        comment.find('.up').click(function () {
+        comment.find('.up').on("click", function () {
           comment.insertBefore(comment.prev());
         });
-        comment.find('.down').click(function () {
+        comment.find('.down').on("click", function () {
           comment.insertAfter(comment.next());
         });
-        comment.find('.add-above').click(function () {
+        comment.find('.add-above').on("click", function () {
           comment.before(createComment());
         });
-        comment.find('.add-below').click(function () {
+        comment.find('.add-below').on("click", function () {
           comment.after(createComment());
         });
-        comment.find('.delete').click(function () {
+        comment.find('.delete').on("click", function () {
           comment.remove();
         });
         return comment;
       }
 
-      addComment.click(function () {
+      addComment.on("click", function () {
         comments.append(createComment());
       });
 
-      clearComments.click(function () {
+      clearComments.on("click", function () {
         comments.empty();
       });
 
@@ -512,7 +515,7 @@
         }
       }
 
-      schedule.click(async function () {
+      schedule.on("click", async function () {
         const data = {
           subreddit: $('#subreddit').val(),
           title: $('#title').val(),
@@ -578,9 +581,26 @@
           })].filter(comment => /\S/.test(comment));
         }
         if (window.saveData) {
-          window.saveData($('#dir').val(), data, files);
+          const pre = submitModal.find('.modal-body pre');
+          pre.text(JSON.stringify(data, null, 2));
+          submitModal.find('.modal-body pre').text(JSON.stringify(data, null, 2));
+          await new Promise((resolve, reject) => {
+            submitModal.find('.btn-close').prop("onclick", () => reject);
+            submitModal.find('#submit-modal-cancel').prop("onclick", () => reject);
+            submitModal.find('#submit-modal-ok').prop("onclick", () => resolve);
+            submitModal.modal("show");
+          });
+          const dir = $('#dir').val();
+          await window.saveData(dir, data, files);
+          doneModal.find('#done-modal-label').text(`${dir} scheduled!`);
+          doneModal.find('.modal-body pre').text(JSON.stringify(data, null, 2));
+          await new Promise(resolve => {
+            doneModal.find('.btn-close').prop("onclick", () => resolve);
+            doneModal.find('#done-modal-ok').prop("onclick", () => resolve);
+            doneModal.modal("show");
+          });
         } else {
-          alert("Please open this page using `npm run schedule`.");
+          wrongOpenModal.modal("show");
         }
       });
     });
@@ -722,6 +742,49 @@
     <span class="input-group-text">Flair</span>
     <input name="flair" type="text" class="form-control" aria-label="flair" placeholder="flair" id="flair">
     <input class="btn btn-primary" type="submit" id="schedule" value="Schedule">
+  </div>
+  <div class="modal fade" id="submit-modal" tabindex="-1" aria-labelledby="submit-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="submit-modal-label">Schedule post?</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body"><code><pre></pre></code></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="submit-modal-cancel">Cancel</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="submit-modal-ok">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="done-modal" tabindex="-1" aria-labelledby="done-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="done-modal-label">Post scheduled!</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body"><code><pre></pre></code></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="done-modal-ok">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="wrong-open-modal" tabindex="-1" aria-labelledby="done-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="wrong-open-modal-label">Post scheduled!</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">Please open this page using <code>npm run schedule</code>.</div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="wrong-open-modal-ok">OK</button>
+        </div>
+      </div>
+    </div>
   </div>
 </form>
 </body>
