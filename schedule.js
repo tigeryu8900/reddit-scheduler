@@ -42,17 +42,17 @@ async function finishSaveData(tmpdir, dir, data) {
   });
   const page = await browser.newPage();
   await page.goto("file://" + path.resolve("schedule.html").replaceAll(path.delimiter, "/"));
-  await page.exposeFunction("getTmpdir", getTmpdir);
-  await page.exposeFunction("addFile", addFile);
-  await page.exposeFunction("finishSaveData", finishSaveData);
-  await page.evaluate(async () => await new Promise(resolve => {
+  await Promise.all([
+    page.exposeFunction("getTmpdir", getTmpdir),
+    page.exposeFunction("addFile", addFile),
+    page.exposeFunction("finishSaveData", finishSaveData),
+    page.exposeFunction("closeBrowser", () => browser.close())
+  ]);
+  await page.evaluate(() => {
     window.saveData = async function (dir, data, files) {
       const tmpdir = await getTmpdir();
       await Promise.all(Object.entries(files).map(([name, file]) => addFile(tmpdir, file, name)));
       await finishSaveData(tmpdir, dir, data);
-      alert(`${dir} saved`);
-      resolve();
     }
-  }));
-  await browser.close();
+  });
 })();
