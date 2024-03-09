@@ -14,6 +14,32 @@ const doneDir = path.join(ctxDir, "done");
 const scheduled = {};
 const running = new Set();
 
+function scheduleFunction(handler, time, ...args) {
+  let interval = null;
+  let timeout = null;
+  if (time - Date.now() < 2147483647) {
+    timeout = setTimeout(handler, time - Date.now(), ...args);
+  } else {
+    interval = setInterval(() => {
+      if (time - Date.now() < 2147483647) {
+        clearInterval(interval);
+        interval = null;
+        timeout = setTimeout(handler, time - Date.now(), ...args);
+      }
+    }, 2147483647);
+  }
+  return {
+    abort() {
+      if (interval) {
+        clearInterval(interval);
+      }
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    }
+  };
+}
+
 async function post(browser, dir) {
   console.log(dir, "Starting");
   running.add(dir);
@@ -168,8 +194,10 @@ function schedule(browser, dir, retry = false) {
     const time = Date.parse(dir.replace(
         /^.*?(?<!\d)(\d{4})-(\d{1,2})-(\d{1,2}) (\d{1,2})-(\d{1,2})-(\d{1,2})(?!\d).*$/, "$1-$2-$3T$4:$5:$6"));
     if ((retry || !scheduled.hasOwnProperty(dir)) && !running.has(dir)) {
-      clearTimeout(scheduled[dir]);
-      scheduled[dir] = setTimeout(post, time - Date.now(), browser, dir);
+      if (scheduled[dir]) {
+        scheduled[dir].abort();
+      }
+      scheduled[dir] = scheduleFunction(post, time, browser, dir);
       console.log(dir, "Scheduled");
     }
   } catch (e) {
