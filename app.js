@@ -91,7 +91,7 @@ async function post(browser, dir) {
           let divs = [];
           let time = Date.now();
           while (divs.length < data.images.length) {
-            if (Date.now() - time > 10000) {
+            if (Date.now() - time > 5000 * data.images.length) {
               console.error(dir, "Not enough images", data);
               return;
             }
