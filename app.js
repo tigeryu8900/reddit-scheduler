@@ -164,13 +164,14 @@ async function post(browser, dir) {
       await page.waitForNavigation();
       if (data.comments) {
         console.log(dir, "Adding comments");
-        let markdown = await page.$('::-p-xpath(//*[text()="Markdown Mode"])');
-        if (markdown) {
-          await markdown.click();
-        }
+        await page.waitForSelector('>>> button ::-p-text(Markdown Editor)', 1000).then(
+            () => page.$eval('>>> button ::-p-text(Markdown Editor)', markdown => markdown && markdown.click()),
+            () => {}
+        );
         for (let comment of data.comments) {
-          await page.waitForSelector('[placeholder="What are your thoughts?"]');
-          await page.type('[placeholder="What are your thoughts?"]', comment);
+          await page.waitForSelector('comment-composer-host ::-p-text(Add a comment)');
+          await page.click('comment-composer-host ::-p-text(Add a comment)');
+          await page.type('comment-composer-host shreddit-composer >>> [placeholder="Add a comment"]', comment);
           await page.click('[type="submit"]');
           await page.waitForNetworkIdle();
           await new Promise(resolve => setTimeout(resolve, 5000));
