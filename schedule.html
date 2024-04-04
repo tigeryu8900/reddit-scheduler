@@ -270,7 +270,7 @@
             e.preventDefault();
           }
         } else if (e.type === "paste") {
-          if (!target.is('input:not([type="file"]), textarea, div[contenteditable="true"]') && itemsHandler(items)) {
+          if (!target.is('input:not([type="file"]), textarea, div[contenteditable="plaintext-only"]') && itemsHandler(items)) {
             e.preventDefault();
           }
         } else {
@@ -283,7 +283,7 @@
         const comment = $(String.raw`
           <div class="input-group mb-3" id="image">
             <span class="input-group-text">Comment</span>
-            <div class="form-control comment" aria-label="Comment" contenteditable="true"></div>
+            <div class="form-control comment" aria-label="Comment" contenteditable="plaintext-only"></div>
             <button class="btn btn-primary up" type="button"><i class="bi bi-arrow-up"></i></button>
             <button class="btn btn-primary down" type="button"><i class="bi bi-arrow-down"></i></button>
             <button class="btn btn-primary add-above" type="button">
