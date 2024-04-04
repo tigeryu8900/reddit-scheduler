@@ -49,136 +49,188 @@ async function post(browser, dir) {
     console.log(dir, "Opening page");
     const page = await browser.newPage();
     try {
+      const old = !data.images && !data.gif;
       await page.setUserAgent((await browser.userAgent()).replace(/headless/gi, ""));
       console.log(dir, "Creating post");
-      await page.goto(`https://www.reddit.com/${data.subreddit}/submit`);
-      console.log(dir, "Adding title");
-      await page.type('[placeholder="Title"]', data.title);
-      switch (data.type) {
-        case "text":
-        case "post": {
-          await page.waitForSelector('::-p-xpath(//*[.//i and text()="Post"])');
-          await page.click('::-p-xpath(//*[.//i and text()="Post"])');
-          if (data.body) {
-            console.log(dir, "Adding body");
-            let markdown = await page.$('::-p-xpath(//*[text()="Markdown Mode"])');
-            if (markdown) {
-              await markdown.click();
+      await page.goto(`https://${old ? "old" : "www"}.reddit.com/${data.subreddit}/submit`);
+      if (old) {
+        console.log(dir, "Adding title");
+        await page.type('[name="title"]', data.title);
+        switch (data.type) {
+          case "text":
+          case "post": {
+            await page.click('.text-button');
+            if (data.body) {
+              console.log(dir, "Adding body");
+              await page.type('[name="text"]', data.body);
             }
-            await page.waitForSelector('[placeholder="Text (optional)"]');
-            await page.type('[placeholder="Text (optional)"]', data.body);
           }
+            break;
+          case "image": {
+            console.log(dir, "Adding image");
+            const elementHandle = await page.$('#image');
+            await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
+            await page.waitForSelector('[name="submit"]:not([disabled])', {
+              timeout: 30 * 1000
+            });
+          }
+            break;
+          case "gallery":
+          case "images":
+            console.assert(false, "galleries aren't supported in old reddit");
+            break;
+          case "video": {
+            console.log(dir, "Adding video");
+            const elementHandle = await page.$('#image');
+            await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
+            await page.waitForSelector('[name="submit"]:not([disabled])', {
+              timeout: 5 * 60 * 1000
+            });
+            if (data.thumbnail) {
+              console.log(dir, "Choosing thumbnail");
+              await page.click(`.thumbnail-scroller > :nth-child(${data.thumbnail})`);
+            }
+            console.assert(!data.gif, "posting videos as gifs aren't supported in old reddit");
+          }
+            break;
+          case "url":
+          case "link": {
+            console.log(dir, "Adding url");
+            await page.type('#url', data.url);
+          }
+            break;
         }
-          break;
-        case "image": {
-          await page.waitForSelector('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
-          await page.click('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
-          console.log(dir, "Adding image");
-          let elementHandle = await page.$('input[type="file"]');
-          await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
-        }
-          break;
-        case "gallery":
-        case "images": {
-          await page.waitForSelector('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
-          await page.click('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
-          console.log(dir, "Adding images");
-          for (let image of data.images) {
+        await page.waitForSelector('[name="submit"]:not([disabled])');
+        await page.click('[name="submit"]:not([disabled])');
+        await page.waitForNavigation();
+      } else {
+        console.log(dir, "Adding title");
+        await page.type('[placeholder="Title"]', data.title);
+        switch (data.type) {
+          case "text":
+          case "post": {
+            await page.waitForSelector('::-p-xpath(//*[.//i and text()="Post"])');
+            await page.click('::-p-xpath(//*[.//i and text()="Post"])');
+            if (data.body) {
+              console.log(dir, "Adding body");
+              let markdown = await page.$('::-p-xpath(//*[text()="Markdown Mode"])');
+              if (markdown) {
+                await markdown.click();
+              }
+              await page.waitForSelector('[placeholder="Text (optional)"]');
+              await page.type('[placeholder="Text (optional)"]', data.body);
+            }
+          }
+            break;
+          case "image": {
+            await page.waitForSelector('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
+            await page.click('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
+            console.log(dir, "Adding image");
             let elementHandle = await page.$('input[type="file"]');
-            await elementHandle.uploadFile(path.resolve(pendingDir, dir, image.file));
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
           }
-          let divs = [];
-          let time = Date.now();
-          while (divs.length < data.images.length) {
-            if (Date.now() - time > 5000 * data.images.length) {
-              console.error(dir, "Not enough images", data);
-              return;
-            }
-            divs = await page.$$('div[draggable="true"]:has([style*="background-image"])');
-          }
-          if (data.images.some(({caption, link}) => caption || link)) {
-            await divs[0].click();
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            for (let i = data.images.length - 1; i >= 0; --i) {
-              await divs[i].click();
+            break;
+          case "gallery":
+          case "images": {
+            await page.waitForSelector('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
+            await page.click('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
+            console.log(dir, "Adding images");
+            for (let image of data.images) {
+              let elementHandle = await page.$('input[type="file"]');
+              await elementHandle.uploadFile(path.resolve(pendingDir, dir, image.file));
               await new Promise(resolve => setTimeout(resolve, 1000));
-              if (data.images[i].caption) {
-                await page.type('[placeholder="Add a caption..."]', data.images[i].caption);
+            }
+            let divs = [];
+            let time = Date.now();
+            while (divs.length < data.images.length) {
+              if (Date.now() - time > 5000 * data.images.length) {
+                console.error(dir, "Not enough images", data);
+                return;
               }
-              if (data.images[i].link) {
-                await page.type('[placeholder="Add a link..."]', data.images[i].link);
+              divs = await page.$$('div[draggable="true"]:has([style*="background-image"])');
+            }
+            if (data.images.some(({caption, link}) => caption || link)) {
+              await divs[0].click();
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              for (let i = data.images.length - 1; i >= 0; --i) {
+                await divs[i].click();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (data.images[i].caption) {
+                  await page.type('[placeholder="Add a caption..."]', data.images[i].caption);
+                }
+                if (data.images[i].link) {
+                  await page.type('[placeholder="Add a link..."]', data.images[i].link);
+                }
               }
             }
           }
-        }
-          break;
-        case "video": {
-          await page.waitForSelector('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
-          await page.click('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
-          console.log(dir, "Adding video");
-          let elementHandle = await page.$('input[type="file"]');
-          await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
-          await page.waitForSelector('::-p-xpath(//*[not(.//*) and text()="Choose thumbnail"])', {
-            timeout: 5 * 60 * 1000
-          });
-          if (data.thumbnail) {
-            console.log(dir, "Choosing thumbnail");
-            await page.click('::-p-xpath(//*[./*[not(.//*) and text()="Choose thumbnail"]])');
-            await page.waitForSelector('div:has(> div:nth-child(10):last-child > img)');
-            await page.click(`div:has(> div:nth-child(10):last-child > img) > div:nth-child(${data.thumbnail})`);
-            await page.click('::-p-xpath(//*[text()="Select"])');
+            break;
+          case "video": {
+            await page.waitForSelector('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
+            await page.click('::-p-xpath(//*[.//i and (text()="Images" or text()="Images & Video")])');
+            console.log(dir, "Adding video");
+            let elementHandle = await page.$('input[type="file"]');
+            await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
+            await page.waitForSelector('::-p-xpath(//*[not(.//*) and text()="Choose thumbnail"])', {
+              timeout: 5 * 60 * 1000
+            });
+            if (data.thumbnail) {
+              console.log(dir, "Choosing thumbnail");
+              await page.click('::-p-xpath(//*[./*[not(.//*) and text()="Choose thumbnail"]])');
+              await page.waitForSelector('div:has(> div:nth-child(10):last-child > img)');
+              await page.click(`div:has(> div:nth-child(10):last-child > img) > div:nth-child(${data.thumbnail})`);
+              await page.click('::-p-xpath(//*[text()="Select"])');
+            }
+            if (data.gif) {
+              await page.click('::-p-xpath(//*[text()="Make GIF"])');
+            }
           }
-          if (data.gif) {
-            await page.click('::-p-xpath(//*[text()="Make GIF"])');
+            break;
+          case "url":
+          case "link": {
+            await page.waitForSelector('::-p-xpath(//*[.//i and text()="Link"])');
+            await page.click('::-p-xpath(//*[.//i and text()="Link"])');
+            console.log(dir, "Adding url");
+            await page.waitForSelector('[placeholder="Url"]');
+            await page.type('[placeholder="Url"]', data.url);
           }
+            break;
         }
-          break;
-        case "url":
-        case "link": {
-          await page.waitForSelector('::-p-xpath(//*[.//i and text()="Link"])');
-          await page.click('::-p-xpath(//*[.//i and text()="Link"])');
-          console.log(dir, "Adding url");
-          await page.waitForSelector('[placeholder="Url"]');
-          await page.type('[placeholder="Url"]', data.url);
-        }
-          break;
+        await page.waitForSelector('::-p-xpath(//*[not(.//i) and text()="Post" and not(@disabled)])');
+        await page.click('::-p-xpath(//*[not(.//i) and text()="Post" and not(@disabled)])');
+        await page.waitForNavigation();
       }
+      await page.goto(page.url().replace("www.reddit.com", "old.reddit.com"));
       console.log(dir, "Setting tags and flair");
       if (data.oc) {
-        await page.click('::-p-xpath(//*[text()="OC"])');
+        await page.click('.buttons [data-event-action="markoriginalcontent"]');
+        await page.click('.buttons form:has([data-event-action="markoriginalcontent"]) .yes');
       }
       if (data.spoiler) {
-        await page.click('::-p-xpath(//*[text()="Spoiler"])');
+        await page.click('.buttons [data-event-action="spoiler"]');
+        await page.click('.buttons form:has([data-event-action="spoiler"]) .yes');
       }
       if (data.nsfw) {
-        await page.click('::-p-xpath(//*[text()="NSFW"])');
+        await page.click('.buttons [data-event-action="marknsfw"]');
+        await page.click('.buttons form:has([data-event-action="marknsfw"]) .yes');
       }
       if (data.flair) {
-        await page.click('::-p-xpath(//*[text()="Flair"])');
-        await page.click(`[aria-label="flair_picker"] ::-p-xpath(//*[text()=${JSON.stringify(data.flair)}])`);
-        await page.click('::-p-xpath(//*[text()="Apply"])');
+        await page.click('.buttons [data-event-action="editflair"]');
+        await page.waitForSelector('.flairselector.active form');
+        await page.click(`.flairselector.active .flairoptionpane [title=${JSON.stringify(data.flair)}]`);
+        await page.click('.flairselector.active .flairoptionpane [type="submit"]');
       }
-      await page.waitForSelector('::-p-xpath(//*[not(.//i) and text()="Post" and not(@disabled)])');
-      await page.click('::-p-xpath(//*[not(.//i) and text()="Post" and not(@disabled)])');
-      await page.waitForNavigation();
       if (data.comments) {
         console.log(dir, "Adding comments");
-        await page.waitForSelector('>>> button ::-p-text(Markdown Editor)', 1000).then(
-            () => page.$eval('>>> button ::-p-text(Markdown Editor)', markdown => markdown && markdown.click()),
-            () => {}
-        );
         for (let comment of data.comments) {
-          await page.waitForSelector('comment-composer-host ::-p-text(Add a comment)');
-          await page.click('comment-composer-host ::-p-text(Add a comment)');
-          await page.type('comment-composer-host shreddit-composer >>> [placeholder="Add a comment"]', comment);
-          await page.click('[type="submit"]');
-          await page.waitForNetworkIdle();
+          await page.waitForSelector('form.cloneable [name="text"]');
+          await page.type('form.cloneable [name="text"]', comment);
+          await page.click('form.cloneable [type="submit"]');
           await new Promise(resolve => setTimeout(resolve, 5000));
         }
       }
       success = true;
-      console.log(dir, "Posted", page.url(), data);
+      console.log(dir, "Posted", page.url().replace("old.reddit.com", "www.reddit.com"), data);
       break;
     } catch (e) {
       console.error(dir, "Error", data, e);
@@ -268,11 +320,12 @@ async function exit(signal) {
   const page = await browser.newPage();
   await page.setUserAgent((await browser.userAgent()).replace(/headless/gi, ""));
   console.log(process.pid, "Signing in");
-  await page.goto("https://www.reddit.com/login/");
+  await page.goto("https://old.reddit.com/login/");
   try {
-    await page.type('#loginUsername', process.env.USERNAME);
-    await page.type('#loginPassword', process.env.PASSWORD);
-    await page.click('.AnimatedForm [type="submit"]');
+    await page.type('#user_login', process.env.USERNAME);
+    await page.type('#passwd_login', process.env.PASSWORD);
+    await page.click('#rem_login');
+    await page.click('#login-form [type="submit"]');
     await page.waitForNetworkIdle();
     console.log(process.pid, "Signed in");
   } catch (e) {
