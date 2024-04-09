@@ -88,6 +88,7 @@ async function post(browser, dir) {
             });
             if (data.thumbnail) {
               console.log(dir, "Choosing thumbnail");
+              await page.waitForSelector(`.thumbnail-scroller > :nth-child(${data.thumbnail})`);
               await page.click(`.thumbnail-scroller > :nth-child(${data.thumbnail})`);
             }
             console.assert(!data.gif, "posting videos as gifs aren't supported in old reddit");
