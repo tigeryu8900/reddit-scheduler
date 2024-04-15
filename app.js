@@ -103,6 +103,13 @@ async function post(browser, dir) {
           }
             break;
         }
+        if (data.flair) {
+          logger.log(dir, "Setting flair");
+          await page.click('.flairselect-btn');
+          await page.waitForSelector('.flairselector.active form');
+          await page.click(`.flairselector.active .flairoptionpane [title=${JSON.stringify(data.flair)}]`);
+          await page.click('.flairselector.active [type="submit"]');
+        }
         await page.waitForSelector('[name="submit"]:not([disabled])');
         await page.click('[name="submit"]:not([disabled])');
         await page.waitForNavigation();
@@ -199,6 +206,12 @@ async function post(browser, dir) {
           }
             break;
         }
+        if (data.flair) {
+          logger.log(dir, "Setting flair");
+          await page.click('::-p-xpath(//*[text()="Flair"])');
+          await page.click(`[aria-label="flair_picker"] ::-p-xpath(//*[text()=${JSON.stringify(data.flair)}])`);
+          await page.click('::-p-xpath(//*[text()="Apply"])');
+        }
         await page.waitForSelector('::-p-xpath(//*[not(.//i) and text()="Post" and not(@disabled)])');
         await page.click('::-p-xpath(//*[not(.//i) and text()="Post" and not(@disabled)])');
         await page.waitForNavigation();
@@ -216,12 +229,6 @@ async function post(browser, dir) {
       if (data.nsfw) {
         await page.click('.buttons [data-event-action="marknsfw"]');
         await page.click('.buttons form:has([data-event-action="marknsfw"]) .yes');
-      }
-      if (data.flair) {
-        await page.click('.buttons [data-event-action="editflair"]');
-        await page.waitForSelector('.flairselector.active form');
-        await page.click(`.flairselector.active .flairoptionpane [title=${JSON.stringify(data.flair)}]`);
-        await page.click('.flairselector.active .flairoptionpane [type="submit"]');
       }
       if (data.comments) {
         logger.log(dir, "Adding comments");
