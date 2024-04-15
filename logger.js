@@ -5,7 +5,7 @@ export default class Logger {
   constructor(path, options = { flags: "a" }) {
     this.stream = fs.createWriteStream(path, options);
   }
-  assert(value, message = "console.assert", ...optionalParams) {
+  assert(value, message = "Logger.assert", ...optionalParams) {
     if (!value) {
       this.warn(`Assertion failed: ${message}`, ...optionalParams);
     }
