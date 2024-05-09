@@ -331,12 +331,10 @@ async function exit(signal) {
   const page = await browser.newPage();
   await page.setUserAgent((await browser.userAgent()).replace(/headless/gi, ""));
   console.log(process.pid, "Signing in");
-  await page.goto("https://old.reddit.com/login/");
+  await page.goto("https://www.reddit.com/login/");
   try {
-    await page.type('#user_login', process.env.USERNAME);
-    await page.type('#passwd_login', process.env.PASSWORD);
-    await page.click('#rem_login');
-    await page.click('#login-form [type="submit"]');
+    await page.type('input[name="username"]', process.env.USERNAME);
+    await page.type('input[name="password"]', process.env.PASSWORD + "\n");
     await page.waitForNetworkIdle();
     console.log(process.pid, "Signed in");
   } catch (e) {
