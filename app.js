@@ -54,8 +54,8 @@ async function post(browser, dir) {
       const old = !data.images && !data.gif;
       await page.setUserAgent((await browser.userAgent()).replace(/headless/gi, ""));
       logger.log(dir, "Creating post");
-      await page.goto(`https://${old ? "old" : "www"}.reddit.com/${data.subreddit}/submit`);
       if (old) {
+        await page.goto(`https://old.reddit.com/${data.subreddit}/submit`);
         logger.log(dir, "Adding title");
         await page.type('[name="title"]', data.title);
         switch (data.type) {
@@ -114,6 +114,7 @@ async function post(browser, dir) {
         await page.click('[name="submit"]:not([disabled])');
         await page.waitForNavigation();
       } else {
+        await page.goto(`https://www.reddit.com/${data.subreddit}/submit`);
         logger.log(dir, "Adding title");
         await page.type('[placeholder="Title"]', data.title);
         switch (data.type) {
