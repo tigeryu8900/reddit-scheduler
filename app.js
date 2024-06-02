@@ -228,12 +228,16 @@ async function post(browser, dir) {
         }
         if (data.flair) {
           logger.log(dir, "Setting flair");
-          await page.click('::-p-xpath(//button[text()="Add flair and tags"])');
-          let allFlairs = await page.$('::-p-xpath(//*[text()="View all flairs"])');
+          await page.click('>>> #reddit-post-flair-button');
+          let allFlairs = await page.$('>>> #view-all-flairs-button');
           if (allFlairs) {
             await allFlairs.click();
           }
-          await page.click(`[name="flairId"] ::-p-xpath(//*[text()=${JSON.stringify(data.flair)}])`);
+          await page.$$eval('>>> [aria-label="Post Flair Selection form"] [name="flairId"] >>> span',
+              async (elements, flair) => {
+            console.log(elements, flair);
+            elements.find(element => element.innerText === flair).click();
+          }, data.flair);
           await page.click('>>> button.apply');
         }
         await waitAndClick(page, '>>> #inner-post-submit-button');
