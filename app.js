@@ -97,9 +97,14 @@ async function post(browser, dir) {
             const elementHandle = await page.$('#image');
             await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
             await elementHandle.dispose();
-            await page.waitForSelector('[name="submit"]:not([disabled])', {
-              timeout: 5 * 60 * 1000
-            });
+            let progress = "0%";
+            while (await page.$('[name="submit"][disabled]')) {
+              await page.waitForSelector(`#media-progress-bar:not([style*="width: ${progress}"])`);
+              progress = await page.evaluate(elementHandle => elementHandle.style.width,
+                  await page.$(`#media-progress-bar:not([style*="width: ${progress}"])`)
+              );
+            }
+            await page.waitForSelector('[name="submit"]:not([disabled])');
             if (data.thumbnail) {
               logger.log(dir, "Choosing thumbnail");
               await waitAndClick(page, `.thumbnail-scroller > :nth-child(${data.thumbnail})`);
