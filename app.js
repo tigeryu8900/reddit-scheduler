@@ -99,10 +99,10 @@ async function post(browser, dir) {
             await elementHandle.dispose();
             let progress = "0%";
             while (progress !== "100%") {
-              await page.waitForSelector(`#media-progress-bar:not([style*="width: ${progress}"])`);
+              await page.waitForSelector(`#media-progress-bar:not([style*="width: ${progress};"])`);
               progress = await page.evaluate(
                   element => element ? element.style.width : progress,
-                  await page.$(`#media-progress-bar:not([style*="width: ${progress}"])`),
+                  await page.$(`#media-progress-bar:not([style*="width: ${progress};"])`),
                   progress
               );
             }
