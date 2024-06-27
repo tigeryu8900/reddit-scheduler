@@ -98,10 +98,12 @@ async function post(browser, dir) {
             await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
             await elementHandle.dispose();
             let progress = "0%";
-            while (await page.$('[name="submit"][disabled]')) {
+            while (progress !== "100%") {
               await page.waitForSelector(`#media-progress-bar:not([style*="width: ${progress}"])`);
-              progress = await page.evaluate(elementHandle => elementHandle.style.width,
-                  await page.$(`#media-progress-bar:not([style*="width: ${progress}"])`)
+              progress = await page.evaluate(
+                  element => element ? element.style.width : progress,
+                  await page.$(`#media-progress-bar:not([style*="width: ${progress}"])`),
+                  progress
               );
             }
             await page.waitForSelector('[name="submit"]:not([disabled])');
