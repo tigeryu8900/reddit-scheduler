@@ -181,20 +181,20 @@ async function post(browser, dir) {
               divs = await page.$$('>>> .image-container button.btn-edit');
             }
             if (data.images.some(({caption, link}) => caption || link)) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              await page.locator(`>>> .image-container:first-child button.btn-edit`).click();
               for (let i = 0; i < data.images.length; ++i) {
-                await divs[i].click();
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                if (data.images[i].caption) {
-                  await page.type('>>> textarea[name="caption"]', data.images[i].caption);
+               if (data.images[i].caption) {
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                  await page.locator('>>> textarea[name="caption"]').fill(data.images[i].caption);
                 }
                 if (data.images[i].link) {
-                  await page.type('>>> textarea[name="outboundUrl"]', data.images[i].link);
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                  await page.locator('>>> textarea[name="outboundUrl"]').fill(data.images[i].link);
                 }
-                await page.click('>>> #edit-gallery-modal-save');
+                await page.locator('>>> #media-carousel-next').click();
               }
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              await page.click('#post-composer_media >>>> edit-gallery-modal >>>> #edit-gallery-internal-modal [slot="footer"] button.button-primary');
+              await page.locator('>>> #edit-gallery-modal-save').click();
+              await page.locator('#post-composer_media >>>> edit-gallery-modal >>>> #edit-gallery-internal-modal [slot="footer"] button.button-primary').click();
             }
           }
             break;
