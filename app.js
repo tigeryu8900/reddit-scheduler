@@ -251,6 +251,10 @@ async function post(browser, dir) {
         await page.waitForNavigation();
       }
       await page.goto(page.url().replace("www.reddit.com", "old.reddit.com"));
+      const created = new URL(page.url()).searchParams.get("created");
+      if (created) {
+        await page.goto(`https://old.reddit.com/${data.subreddit}/comments/${created.substring(3)}`);
+      }
       logger.log(dir, "Setting tags");
       if (data.oc) {
         const oc = await page.$('.buttons [data-event-action="markoriginalcontent"]');
