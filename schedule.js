@@ -38,6 +38,7 @@ async function finishSaveData(tmpdir, dir, data) {
       width: 0,
       height: 0
     },
+    pipe: true,
     userDataDir
   });
   const page = await browser.newPage();
