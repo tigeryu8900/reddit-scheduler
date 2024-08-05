@@ -1,10 +1,15 @@
 import puppeteer from "puppeteer";
 import "dotenv/config";
 
+import {createWriteStream} from "fs";
 import fs from "fs/promises";
 import * as path from "path";
 import os from "os";
 import Logger from "./logger.js";
+import crypto from "crypto";
+import {Readable} from "stream";
+import {finished} from "stream/promises";
+import {ReadableStream} from "stream/web";
 
 const ctxDir = path.join(os.homedir(), ".reddit");
 const pidDir = path.join(ctxDir, "pid");
@@ -51,12 +56,26 @@ async function waitAndClick(page, selector) {
   }, await page.$(selector));
 }
 
+async function uploadFile(page, elementHandle, dir, file, tempFiles) {
+  if (/^https?:\/\//.test(file)) {
+    const res = await fetch(file);
+    const tempfile = path.join(os.tmpdir(), `${crypto.randomUUID()}.png`);
+    const fileStream = createWriteStream(tempfile);
+    await finished(Readable.fromWeb(ReadableStream.from(res.body)).pipe(fileStream));
+    await elementHandle.uploadFile(tempfile);
+    tempFiles.append(tempfile);
+  } else {
+    await elementHandle.uploadFile(path.resolve(pendingDir, dir, file));
+  }
+}
+
 async function post(browser, dir) {
   const logger = new Logger(path.join(pendingDir, dir, "output.log"));
   logger.log(dir, "Starting");
   running.add(dir);
   const data = JSON.parse((await fs.readFile(path.join(pendingDir, dir, "data.json"))).toString());
   let success = false;
+  const tempFiles = [];
   for (let i = 0; i < (data.maxRetries || 0) + 1; ++i) {
     logger.log(dir, "Opening page");
     const page = await browser.newPage();
@@ -81,7 +100,7 @@ async function post(browser, dir) {
           case "image": {
             logger.log(dir, "Adding image");
             const elementHandle = await page.$('#image');
-            await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
+            await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
             await elementHandle.dispose();
             await page.waitForSelector('[name="submit"]:not([disabled])', {
               timeout: 30 * 1000
@@ -95,7 +114,7 @@ async function post(browser, dir) {
           case "video": {
             logger.log(dir, "Adding video");
             const elementHandle = await page.$('#image');
-            await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
+            await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
             await elementHandle.dispose();
             let progress = "0%";
             while (progress !== "100%") {
@@ -154,7 +173,7 @@ async function post(browser, dir) {
             await page.type('>>> textarea[name="title"]', data.title);
             logger.log(dir, "Adding image");
             let elementHandle = await page.$('>>> input[type="file"][multiple="multiple"]');
-            await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
+            await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
             await elementHandle.dispose();
           }
             break;
@@ -166,7 +185,7 @@ async function post(browser, dir) {
             logger.log(dir, "Adding images");
             for (let image of data.images) {
               let elementHandle = await page.$('>>> input[type="file"][multiple="multiple"]');
-              await elementHandle.uploadFile(path.resolve(pendingDir, dir, image.file));
+              await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), image.file, tempFiles);
               await elementHandle.dispose();
               await new Promise(resolve => setTimeout(resolve, 1000));
             }
@@ -204,7 +223,7 @@ async function post(browser, dir) {
             await page.type('>>> textarea[name="title"]', data.title);
             logger.log(dir, "Adding video");
             let elementHandle = await page.$('>>> input[type="file"][multiple="multiple"]');
-            await elementHandle.uploadFile(path.resolve(pendingDir, dir, data.file));
+            await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
             await elementHandle.dispose();
             await page.waitForSelector('>>> button.edit-media', {
               timeout: 5 * 60 * 1000
@@ -294,6 +313,9 @@ async function post(browser, dir) {
     } finally {
       await page.close();
       await logger.close();
+      for (const tempFile of tempFiles) {
+        await fs.rm(tempFile);
+      }
     }
   }
   await fs.rename(path.join(pendingDir, dir), path.join(success ? doneDir : failedDir, dir));

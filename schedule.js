@@ -2,8 +2,12 @@ import puppeteer from "puppeteer";
 
 import * as path from "path";
 import os from "os";
+import {createWriteStream} from "fs";
 import fs from "fs/promises";
 import * as crypto from "crypto";
+import {Readable} from "stream";
+import {ReadableStream} from "stream/web";
+import {finished} from "stream/promises";
 
 const pendingDir = path.join(os.homedir(), ".reddit", "pending");
 const userDataDir = path.join(os.homedir(), ".reddit", "Scheduler User Data");
@@ -18,6 +22,12 @@ async function addFile(tmpdir, file, name) {
   switch (file.type) {
     case "path":
       await fs.symlink(file.data.replaceAll("/", path.sep), path.join(tmpdir, name));
+      break;
+    case "url":
+      const res = await fetch(file);
+      const fileStream = createWriteStream(path.join(tmpdir, name));
+      await finished(Readable.fromWeb(ReadableStream.from(res.body)).pipe(fileStream));
+      await fs.writeFile(path.join(tmpdir, name), res.arrayBuffer());
       break;
     case "binary":
       await fs.writeFile(path.join(tmpdir, name), Buffer.from(file.data, "binary"));
