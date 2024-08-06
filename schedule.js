@@ -24,7 +24,7 @@ async function addFile(tmpdir, file, name) {
       await fs.symlink(file.data.replaceAll("/", path.sep), path.join(tmpdir, name));
       break;
     case "url":
-      const res = await fetch(file);
+      const res = await fetch(file.data);
       const fileStream = createWriteStream(path.join(tmpdir, name));
       await finished(Readable.fromWeb(ReadableStream.from(res.body)).pipe(fileStream));
       await fs.writeFile(path.join(tmpdir, name), res.arrayBuffer());
