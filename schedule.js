@@ -27,7 +27,6 @@ async function addFile(tmpdir, file, name) {
       const res = await fetch(file.data);
       const fileStream = createWriteStream(path.join(tmpdir, name));
       await finished(Readable.fromWeb(ReadableStream.from(res.body)).pipe(fileStream));
-      await fs.writeFile(path.join(tmpdir, name), res.arrayBuffer());
       break;
     case "binary":
       await fs.writeFile(path.join(tmpdir, name), Buffer.from(file.data, "binary"));
