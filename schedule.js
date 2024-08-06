@@ -8,6 +8,7 @@ import * as crypto from "crypto";
 import {Readable} from "stream";
 import {ReadableStream} from "stream/web";
 import {finished} from "stream/promises";
+import mime from "mime-types";
 
 const pendingDir = path.join(os.homedir(), ".reddit", "pending");
 const userDataDir = path.join(os.homedir(), ".reddit", "Scheduler User Data");
@@ -56,7 +57,8 @@ async function finishSaveData(tmpdir, dir, data) {
     page.exposeFunction("getTmpdir", getTmpdir),
     page.exposeFunction("addFile", addFile),
     page.exposeFunction("finishSaveData", finishSaveData),
-    page.exposeFunction("closeBrowser", () => browser.close())
+    page.exposeFunction("closeBrowser", () => browser.close()),
+    page.exposeFunction("mimeExtension", name => mime.extension(name))
   ]);
   await page.evaluate(() => {
     window.saveData = async function (dir, data, files) {

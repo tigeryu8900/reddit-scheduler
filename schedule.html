@@ -324,7 +324,6 @@
       });
 
       function uniqueName(name, files) {
-        name = name.replaceAll(/[^a-zA-Z0-9_\-]/g, "_");
         let [, base, ext] = name.match(/^(.*?)(\..*)?$/);
         for (let i = 2; name in files; ++i) {
           name = `${base} ${i}${ext}`;
@@ -344,7 +343,12 @@
             };
             return name;
           } else if (/^https?:\/\//.test(path)) {
-            const name = uniqueName(path.match(/[^\/]*$/)[0], files);
+            const res = await fetch(path, {
+              mode: "no-cors"
+            });
+            const base = path.match(/[^\/]*$/)[0].replaceAll(/[^a-zA-Z0-9_\-.]/g, "_");
+            const ext = await window.mimeExtension(res.headers.get("Content-Type")) || "png";
+            const name = base.endsWith(`.${ext}`) ? base : `${base}.${ext}`;
             files[name] = {
               type: "url",
               data: path
