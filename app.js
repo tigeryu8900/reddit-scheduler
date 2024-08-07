@@ -183,25 +183,21 @@ async function post(browser, dir) {
             logger.log(dir, "Adding title");
             await page.type('>>> textarea[name="title"]', data.title);
             logger.log(dir, "Adding images");
-            let divs = [];
-            for (let i = 0; i < data.images.length; i++) {
-              const image = data.images[i];
-              const elementHandle = await page.$('>>> input[type="file"][multiple="multiple"]');
-              loop: for (let j = 0; j < 10 && divs.length <= i; j++) {
-                await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), image.file, tempFiles);
-                const time = Date.now();
-                while (divs.length <= i) {
-                  if (Date.now() - time > 10000) {
-                    continue loop;
-                  }
-                  divs = await page.$$('div[draggable="true"]:has([style*="background-image"])');
-                }
-              }
+            for (let image of data.images) {
+              let elementHandle = await page.$('>>> input[type="file"][multiple="multiple"]');
+              await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), image.file, tempFiles);
               await elementHandle.dispose();
+              await new Promise(resolve => setTimeout(resolve, 1000));
             }
-            if (divs.length < data.images.length) {
-              logger.error(dir, "Not enough images", data);
-              return;
+            let divs = [];
+            let time = Date.now();
+            while (divs.length < data.images.length) {
+              await page.click('>>> button.edit-media');
+              if (Date.now() - time > 5000 * data.images.length) {
+                logger.error(dir, "Not enough images", data);
+                return;
+              }
+              divs = await page.$$('>>> .image-container button.btn-edit');
             }
             if (data.images.some(({caption, link}) => caption || link)) {
               await page.locator(`>>> .image-container:first-child button.btn-edit`).click();
