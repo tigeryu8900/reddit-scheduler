@@ -192,9 +192,14 @@ async function post(browser, dir) {
                 const time = Date.now();
                 while (divs.length <= i) {
                   if (Date.now() - time > 10000) {
-                    continue loop;
+                    break;
                   }
                   divs = await page.$$('div[draggable="true"]:has([style*="background-image"])');
+                }
+                if (divs.length <= i) {
+                  continue;
+                } else {
+                  break;
                 }
               }
               await elementHandle.dispose();
