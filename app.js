@@ -183,20 +183,20 @@ async function post(browser, dir) {
             logger.log(dir, "Adding title");
             await page.type('>>> textarea[name="title"]', data.title);
             logger.log(dir, "Adding images");
-            let divs = [];
+            let numImgs = 0;
             for (let i = 0; i < data.images.length; i++) {
               const image = data.images[i];
               const elementHandle = await page.$('>>> input[type="file"][multiple="multiple"]');
               for (let j = 0; divs.length <= i && j < 10; j++) {
                 await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), image.file, tempFiles);
                 const time = Date.now();
-                while (divs.length <= i && Date.now() - time < 10000) {
-                  divs = await page.$$('>>> img.opacity-30');
+                while (numImgs <= i && Date.now() - time < 10000) {
+                  numImgs = await page.$$eval('>>> faceplate-carousel ul li img.opacity-30', imgs => imgs.reduce((acc, img) => img.src.startsWith("blob:") ? acc.add(img.src) : acc, new Set()).size);
                 }
               }
               await elementHandle.dispose();
             }
-            if (divs.length < data.images.length) {
+            if (numImgs < data.images.length) {
               logger.error(dir, "Not enough images", data);
               return;
             }
