@@ -187,7 +187,7 @@ async function post(browser, dir) {
             for (let i = 0; i < data.images.length; i++) {
               const image = data.images[i];
               const elementHandle = await page.$('>>> input[type="file"][multiple="multiple"]');
-              for (let j = 0; divs.length <= i && j < 10; j++) {
+              for (let j = 0; numImgs <= i && j < 10; j++) {
                 await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), image.file, tempFiles);
                 const time = Date.now();
                 while (numImgs <= i && Date.now() - time < 10000) {
