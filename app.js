@@ -200,9 +200,9 @@ async function post(browser, dir) {
               logger.error(dir, "Not enough images", data);
               return;
             }
-            await page.click('>>> button.edit-media');
+            await page.locator('>>> button.edit-media').click();
             if (data.images.some(({caption, link}) => caption || link)) {
-              await page.locator(`>>> .image-container:first-child button.btn-edit`).click();
+              await page.locator(`>>> .image-container:first-child button.btn-edit`).setTimeout(10000).click();
               for (let i = 0; i < data.images.length; ++i) {
                if (data.images[i].caption) {
                   await new Promise(resolve => setTimeout(resolve, 500));
@@ -231,16 +231,16 @@ async function post(browser, dir) {
               timeout: 5 * 60 * 1000
             });
             if (data.thumbnail || data.gif) {
-              await page.click('>>> button.edit-media');
+              await page.locator('>>> button.edit-media').click();
               await new Promise(resolve => setTimeout(resolve, 1000));
               if (data.thumbnail) {
                 logger.log(dir, "Choosing thumbnail");
                 await waitAndClick(page, `>>> .thumbnail:nth-child(${data.thumbnail})`);
               }
               if (data.gif) {
-                await page.click('#post-composer_media >>>> edit-video-modal >>>> #edit-video-internal-modal faceplate-checkbox-input');
+                await page.locator('#post-composer_media >>>> edit-video-modal >>>> #edit-video-internal-modal faceplate-checkbox-input').click();
               }
-              await page.click('#post-composer_media >>>> edit-video-modal >>>> #edit-video-internal-modal [slot="footer"] button.button-primary');
+              await page.locator('#post-composer_media >>>> edit-video-modal >>>> #edit-video-internal-modal [slot="footer"] button.button-primary').click();
             }
           }
             break;
@@ -256,7 +256,7 @@ async function post(browser, dir) {
         }
         if (data.flair) {
           logger.log(dir, "Setting flair");
-          await page.click('>>> #reddit-post-flair-button');
+          await page.locator('>>> #reddit-post-flair-button').click();
           let allFlairs = await page.$('>>> #view-all-flairs-button');
           if (allFlairs) {
             await allFlairs.click();
@@ -266,7 +266,7 @@ async function post(browser, dir) {
             console.log(elements, flair);
             elements.find(element => element.innerText === flair).click();
           }, data.flair);
-          await page.click('>>> button.apply');
+          await page.locator('>>> button.apply').click();
         }
         await waitAndClick(page, '>>> #inner-post-submit-button');
         await page.waitForNavigation();
@@ -281,21 +281,21 @@ async function post(browser, dir) {
         const oc = await page.$('.buttons [data-event-action="markoriginalcontent"]');
         if (oc) {
           await oc.click();
-          await page.click('.buttons form:has([data-event-action="markoriginalcontent"]) .yes');
+          await page.locator('.buttons form:has([data-event-action="markoriginalcontent"]) .yes').click();
         }
       }
       if (data.spoiler) {
         const spoiler = await page.$('.buttons [data-event-action="spoiler"]');
         if (spoiler) {
           await spoiler.click();
-          await page.click('.buttons form:has([data-event-action="spoiler"]) .yes');
+          await page.locator('.buttons form:has([data-event-action="spoiler"]) .yes').click();
         }
       }
       if (data.nsfw) {
         const nsfw = await page.$('.buttons [data-event-action="marknsfw"]');
         if (nsfw) {
           await nsfw.click();
-          await page.click('.buttons form:has([data-event-action="marknsfw"]) .yes');
+          await page.locator('.buttons form:has([data-event-action="marknsfw"]) .yes').click();
         }
       }
       if (data.comments) {
@@ -303,7 +303,7 @@ async function post(browser, dir) {
         for (let comment of data.comments) {
           await page.waitForSelector('form.cloneable [name="text"]');
           await page.type('form.cloneable [name="text"]', comment);
-          await page.click('form.cloneable [type="submit"]');
+          await page.locator('form.cloneable [type="submit"]').click();
           await new Promise(resolve => setTimeout(resolve, 5000));
         }
       }
