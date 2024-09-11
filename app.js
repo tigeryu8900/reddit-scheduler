@@ -46,16 +46,6 @@ function scheduleFunction(handler, time, ...args) {
   };
 }
 
-async function waitAndClick(page, selector) {
-  await page.waitForSelector(selector);
-  await page.evaluate(async btn => {
-    for (let i = 0; i < 10 && btn.disabled; ++i) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-    btn.click();
-  }, await page.$(selector));
-}
-
 async function uploadFile(page, elementHandle, dir, file, tempFiles) {
   if (/^https?:\/\//.test(file)) {
     const res = await fetch(file);
@@ -124,11 +114,12 @@ async function post(browser, dir) {
                   await page.$(`#media-progress-bar:not([style*="width: ${progress};"])`),
                   progress
               );
+              logger.log(`Upload progress: ${progress}`);
             }
             await page.waitForSelector('[name="submit"]:not([disabled])');
             if (data.thumbnail) {
               logger.log(dir, "Choosing thumbnail");
-              await waitAndClick(page, `.thumbnail-scroller > :nth-child(${data.thumbnail})`);
+              await page.locator(`.thumbnail-scroller > :nth-child(${data.thumbnail})`).click();
             }
             logger.assert(!data.gif, "posting videos as gifs aren't supported in old reddit");
           }
@@ -147,7 +138,7 @@ async function post(browser, dir) {
           await page.click(`.flairselector.active .flairoptionpane [title=${JSON.stringify(data.flair)}]`);
           await page.click('.flairselector.active [type="submit"]');
         }
-        await waitAndClick(page, '[name="submit"]');
+        await page.locator('[name="submit"]').click();
         await page.waitForNavigation();
       } else {
         switch (data.type) {
@@ -235,7 +226,7 @@ async function post(browser, dir) {
               await new Promise(resolve => setTimeout(resolve, 1000));
               if (data.thumbnail) {
                 logger.log(dir, "Choosing thumbnail");
-                await waitAndClick(page, `>>> .thumbnail:nth-child(${data.thumbnail})`);
+                await page.locator(`>>> .thumbnail:nth-child(${data.thumbnail})`).click();
               }
               if (data.gif) {
                 await page.locator('#post-composer_media >>>> edit-video-modal >>>> #edit-video-internal-modal faceplate-checkbox-input').click();
