@@ -259,7 +259,7 @@ async function post(browser, dir) {
           }, data.flair);
           await page.locator('>>> button.apply').click();
         }
-        await waitAndClick(page, '>>> #inner-post-submit-button');
+        await page.locator('>>> #inner-post-submit-button').click();
         await page.waitForNavigation();
       }
       await page.goto(page.url().replace("www.reddit.com", "old.reddit.com"));
