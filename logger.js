@@ -2,8 +2,17 @@ import * as util from "node:util";
 import fs from "fs";
 
 export default class Logger {
-  constructor(path, options = { flags: "a" }) {
+  constructor(path, prefix = "", options = { flags: "a" }) {
     this.stream = fs.createWriteStream(path, options);
+    this.prefix = prefix;
+  }
+  #log(type, ...args) {
+    if (typeof args[0] === "string") {
+      console[type](this.prefix + args[0], ...args.slice(1));
+    } else {
+      console[type](this.prefix, ...args);
+    }
+    this.stream.write(util.format(...args) + "\n");
   }
   assert(value, message = "Logger.assert", ...optionalParams) {
     if (!value) {
@@ -11,24 +20,19 @@ export default class Logger {
     }
   }
   debug(...args) {
-    console.debug(...args);
-    this.stream.write(util.format(...args) + "\n");
+    this.#log("debug", ...args);
   }
   error(...args) {
-    console.error(...args);
-    this.stream.write(util.format(...args) + "\n");
+    this.#log("error", ...args);
   }
   info(...args) {
-    console.info(...args);
-    this.stream.write(util.format(...args) + "\n");
+    this.#log("info", ...args);
   }
   log(...args) {
-    console.log(...args);
-    this.stream.write(util.format(...args) + "\n");
+    this.#log("log", ...args);
   }
   warn(...args) {
-    console.warn(...args);
-    this.stream.write(util.format(...args) + "\n");
+    this.#log("warn", ...args);
   }
   close() {
     return new Promise(resolve => this.stream.close(resolve));

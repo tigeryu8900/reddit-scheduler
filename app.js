@@ -60,35 +60,35 @@ async function uploadFile(page, elementHandle, dir, file, tempFiles) {
 }
 
 async function post(browser, dir) {
-  const logger = new Logger(path.join(pendingDir, dir, "output.log"));
-  logger.log(dir, "Starting");
+  const logger = new Logger(path.join(pendingDir, dir, "output.log"), dir);
+  logger.log("Starting");
   running.add(dir);
   const data = JSON.parse((await fs.readFile(path.join(pendingDir, dir, "data.json"))).toString());
   let success = false;
   const tempFiles = [];
   for (let i = 0; i < (data.maxRetries || 0) + 1; ++i) {
-    logger.log(dir, "Opening page");
+    logger.log("Opening page");
     const page = await browser.newPage();
     try {
       const old = !data.images && !data.gif;
       await page.setUserAgent((await browser.userAgent()).replace(/headless/gi, ""));
-      logger.log(dir, "Creating post");
+      logger.log("Creating post");
       if (old) {
         await page.goto(`https://old.reddit.com/${data.subreddit}/submit`);
-        logger.log(dir, "Adding title");
+        logger.log("Adding title");
         await page.type('[name="title"]', data.title);
         switch (data.type) {
           case "text":
           case "post": {
             await page.click('.text-button');
             if (data.body) {
-              logger.log(dir, "Adding body");
+              logger.log("Adding body");
               await page.type('[name="text"]', data.body);
             }
           }
             break;
           case "image": {
-            logger.log(dir, "Adding image");
+            logger.log("Adding image");
             const elementHandle = await page.$('#image');
             await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
             await elementHandle.dispose();
@@ -102,7 +102,7 @@ async function post(browser, dir) {
             logger.assert(false, "galleries aren't supported in old reddit");
             break;
           case "video": {
-            logger.log(dir, "Adding video");
+            logger.log("Adding video");
             const elementHandle = await page.$('#image');
             await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
             await elementHandle.dispose();
@@ -118,7 +118,7 @@ async function post(browser, dir) {
             }
             await page.waitForSelector('[name="submit"]:not([disabled])');
             if (data.thumbnail) {
-              logger.log(dir, "Choosing thumbnail");
+              logger.log("Choosing thumbnail");
               await page.locator(`.thumbnail-scroller > :nth-child(${data.thumbnail})`).click();
             }
             logger.assert(!data.gif, "posting videos as gifs aren't supported in old reddit");
@@ -126,13 +126,13 @@ async function post(browser, dir) {
             break;
           case "url":
           case "link": {
-            logger.log(dir, "Adding url");
+            logger.log("Adding url");
             await page.type('#url', data.url);
           }
             break;
         }
         if (data.flair) {
-          logger.log(dir, "Setting flair");
+          logger.log("Setting flair");
           await page.click('.flairselect-btn');
           await page.waitForSelector('.flairselector.active form');
           await page.click(`.flairselector.active .flairoptionpane [title=${JSON.stringify(data.flair)}]`);
@@ -145,10 +145,10 @@ async function post(browser, dir) {
           case "text":
           case "post": {
             await page.goto(`https://www.reddit.com/${data.subreddit}/submit?type=TEXT`);
-            logger.log(dir, "Adding title");
+            logger.log("Adding title");
             await page.type('>>> textarea[name="title"]', data.title);
             if (data.body) {
-              logger.log(dir, "Adding body");
+              logger.log("Adding body");
               let markdown = await page.$('>>> ::-p-xpath(//button[text()="Markdown Editor"])');
               if (markdown) {
                 await markdown.click();
@@ -160,9 +160,9 @@ async function post(browser, dir) {
             break;
           case "image": {
             await page.goto(`https://www.reddit.com/${data.subreddit}/submit?type=IMAGE`);
-            logger.log(dir, "Adding title");
+            logger.log("Adding title");
             await page.type('>>> textarea[name="title"]', data.title);
-            logger.log(dir, "Adding image");
+            logger.log("Adding image");
             let elementHandle = await page.$('>>> input[type="file"][multiple="multiple"]');
             await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
             await elementHandle.dispose();
@@ -171,9 +171,9 @@ async function post(browser, dir) {
           case "gallery":
           case "images": {
             await page.goto(`https://www.reddit.com/${data.subreddit}/submit?type=IMAGE`);
-            logger.log(dir, "Adding title");
+            logger.log("Adding title");
             await page.type('>>> textarea[name="title"]', data.title);
-            logger.log(dir, "Adding images");
+            logger.log("Adding images");
             let numImgs = 0;
             for (let i = 0; i < data.images.length; i++) {
               const image = data.images[i];
@@ -188,7 +188,7 @@ async function post(browser, dir) {
               await elementHandle.dispose();
             }
             if (numImgs < data.images.length) {
-              logger.error(dir, "Not enough images", data);
+              logger.error("Not enough images", data);
               return;
             }
             await page.locator('>>> button.edit-media').click();
@@ -212,9 +212,9 @@ async function post(browser, dir) {
             break;
           case "video": {
             await page.goto(`https://www.reddit.com/${data.subreddit}/submit?type=IMAGE`);
-            logger.log(dir, "Adding title");
+            logger.log("Adding title");
             await page.type('>>> textarea[name="title"]', data.title);
-            logger.log(dir, "Adding video");
+            logger.log("Adding video");
             let elementHandle = await page.$('>>> input[type="file"][multiple="multiple"]');
             await uploadFile(page, elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
             await elementHandle.dispose();
@@ -225,7 +225,7 @@ async function post(browser, dir) {
               await page.locator('>>> button.edit-media').click();
               await new Promise(resolve => setTimeout(resolve, 1000));
               if (data.thumbnail) {
-                logger.log(dir, "Choosing thumbnail");
+                logger.log("Choosing thumbnail");
                 await page.locator(`>>> .thumbnail:nth-child(${data.thumbnail})`).click();
               }
               if (data.gif) {
@@ -238,15 +238,15 @@ async function post(browser, dir) {
           case "url":
           case "link": {
             await page.goto(`https://www.reddit.com/${data.subreddit}/submit?type=LINK`);
-            logger.log(dir, "Adding title");
+            logger.log("Adding title");
             await page.type('>>> textarea[name="title"]', data.title);
-            logger.log(dir, "Adding url");
+            logger.log("Adding url");
             await page.type('>>> textarea[name="link"]', data.url);
           }
             break;
         }
         if (data.flair) {
-          logger.log(dir, "Setting flair");
+          logger.log("Setting flair");
           await page.locator('>>> #reddit-post-flair-button').click();
           let allFlairs = await page.$('>>> #view-all-flairs-button');
           if (allFlairs) {
@@ -267,7 +267,7 @@ async function post(browser, dir) {
       if (created) {
         await page.goto(`https://old.reddit.com/${data.subreddit}/comments/${created.substring(3)}`);
       }
-      logger.log(dir, "Setting tags");
+      logger.log("Setting tags");
       if (data.oc) {
         const oc = await page.$('.buttons [data-event-action="markoriginalcontent"]');
         if (oc) {
@@ -290,7 +290,7 @@ async function post(browser, dir) {
         }
       }
       if (data.comments) {
-        logger.log(dir, "Adding comments");
+        logger.log("Adding comments");
         for (let comment of data.comments) {
           await page.waitForSelector('form.cloneable [name="text"]');
           await page.type('form.cloneable [name="text"]', comment);
@@ -299,10 +299,10 @@ async function post(browser, dir) {
         }
       }
       success = true;
-      logger.log(dir, "Posted", page.url().replace("old.reddit.com", "www.reddit.com"), data);
+      logger.log("Posted", page.url().replace("old.reddit.com", "www.reddit.com"), data);
       break;
     } catch (e) {
-      logger.error(dir, "Error", data, e);
+      logger.error("Error", data, e);
     } finally {
       await page.close();
       await logger.close();
