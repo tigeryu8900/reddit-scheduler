@@ -8,7 +8,7 @@ export default class Logger {
   }
   #log(type, ...args) {
     if (typeof args[0] === "string") {
-      console[type](this.prefix + args[0], ...args.slice(1));
+      console[type](this.prefix, args[0], ...args.slice(1));
     } else {
       console[type](this.prefix, ...args);
     }
