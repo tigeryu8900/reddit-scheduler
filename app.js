@@ -60,21 +60,36 @@ async function uploadFile(page, elementHandle, dir, file, tempFiles) {
   }
 }
 
+async function retry(iterations, try_fn = () => {}, catch_fn = () => {}, finally_fn = () => {}) {
+  for (let i = 0; i < iterations; i++) {
+    try {
+      await try_fn();
+      return;
+    } catch (e) {
+      await catch_fn(e);
+    } finally {
+      await finally_fn();
+    }
+  }
+  throw new Error("Retry failed");
+}
+
 async function post(browser, dir) {
   const logger = new Logger(path.join(pendingDir, dir, "output.log"), dir);
   logger.log("Starting");
   running.add(dir);
   const data = JSON.parse(
       (await fs.readFile(path.join(pendingDir, dir, "data.json"))).toString());
-  let success = false;
   const tempFiles = [];
-  for (let i = 0; i < (data.maxRetries || 0) + 1; ++i) {
-    logger.log("Opening page");
-    const page = await browser.newPage();
-    try {
-      const old = !data.images && !data.gif;
-      await page.setUserAgent(
-          (await browser.userAgent()).replace(/headless/gi, ""));
+  const old = !data.images && !data.gif;
+  logger.log("Opening page");
+  const page = await browser.newPage();
+  await page.setUserAgent(
+      (await browser.userAgent()).replace(/headless/gi, ""));
+  const iterations = (data.maxRetries ?? 0) + 1;
+  try {
+    let createdURL = null;
+    await retry(iterations, async () => {
       logger.log("Creating post");
       if (old) {
         await page.goto(`https://old.reddit.com/${data.subreddit}/submit`);
@@ -299,11 +314,17 @@ async function post(browser, dir) {
       }
       await page.goto(page.url().replace("www.reddit.com", "old.reddit.com"));
       const created = new URL(page.url()).searchParams.get("created");
+      createdURL = created ? `https://old.reddit.com/${data.subreddit}/comments/${created.substring(
+          3)}` : page.url();
       if (created) {
-        await page.goto(
-            `https://old.reddit.com/${data.subreddit}/comments/${created.substring(
-                3)}`);
+        createdURL = `https://old.reddit.com/${data.subreddit}/comments/${created.substring(3)}`;
+
+        await page.goto(createdURL);
+      } else {
+        createdURL = page.url();
       }
+    }, e => logger.error("Error", data, e));
+    await retry(iterations, async () => {
       logger.log("Setting tags");
       if (data.oc) {
         const oc = await page.$(
@@ -338,23 +359,24 @@ async function post(browser, dir) {
           await new Promise(resolve => setTimeout(resolve, 5000));
         }
       }
-      success = true;
       logger.log("Posted",
           page.url().replace("old.reddit.com", "www.reddit.com"), data);
-      break;
-    } catch (e) {
+    }, async e => {
       logger.error("Error", data, e);
-    } finally {
-      await page.close();
-      await logger.close();
-      for (const tempFile of tempFiles) {
-        await fs.rm(tempFile);
-      }
+      await page.goto(createdURL);
+    });
+    await fs.rename(path.join(pendingDir, dir), path.join(doneDir, dir));
+  } catch (e) {
+    logger.error("Error", data, e);
+    await fs.rename(path.join(pendingDir, dir), path.join(failedDir, dir));
+  } finally {
+    await page.close();
+    await logger.close();
+    for (const tempFile of tempFiles) {
+      await fs.rm(tempFile);
     }
+    running.delete(dir);
   }
-  await fs.rename(path.join(pendingDir, dir),
-      path.join(success ? doneDir : failedDir, dir));
-  running.delete(dir);
 }
 
 function schedule(browser, dir, retry = false) {
