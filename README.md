@@ -146,16 +146,42 @@ After the post is made, its folder will be moved to `~/.reddit/done/`, or if it 
 will be moved to
 `~/.reddit/failed/`.
 
+### Using `npm install -g reddit-scheduler`
+
+It is also possible to install this package using `npm install -g reddit-scheduler`, in which case
+there is a different way to run the scripts:
+
+```shell
+# To run in the foreground, run this
+reddit start:fg
+
+# To run in the background, run this
+reddit start:bg
+# or this
+reddit start
+# or this
+reddit
+
+# To stop the script, run this
+reddit stop
+
+# To schedule a post using the GUI, run this
+reddit schedule
+
+# To reschedule all tasks in ~/.reddit/pending/, run this
+reddit reschedule
+```
+
 ### Running at startup
 
-It may be useful to run this script at startup.
+It may be useful to run this script at startup. Note that you may use `reddit` as the program name
+instead of `npm start prefix=/path/to/reddit-scheduler` if you used `npm install` to install this package.
 
 #### Windows
 
 [Create a task in Task Scheduler](https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10)
 to run at log in with `npm` as the program and `start prefix=/path/to/reddit-scheduler` where
-`/path/to/reddit-scheduler`
-is the path to the project root as the arguments.
+`/path/to/reddit-scheduler` is the path to the project root as the arguments.
 
 #### macOS
 
