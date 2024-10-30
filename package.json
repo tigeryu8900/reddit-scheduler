@@ -1,37 +1,47 @@
 {
   "name": "reddit-scheduler",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.ts",
+  "description": "A Reddit scheduler for posts",
+  "main": "bin.js",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tigeryu8900/reddit-scheduler.git"
+    "url": "git+https://github.com/tigeryu8900/reddit-scheduler.git"
   },
   "scripts": {
     "start": "npm run start:bg",
-    "start:fg": "tsx app.ts",
-    "start:bg": "nohup tsx app.ts &",
+    "start:fg": "node app.js",
+    "start:bg": "nohup node app.js &",
     "stop": "kill $(cat ~/.reddit/pid)",
     "restart": "npm start",
     "restart:fg": "npm start:fg",
     "restart:bg": "npm start:bg",
     "schedule": "node schedule.js",
     "reschedule": "touch ~/.reddit/pending/reschedule",
-    "create-data-d-ts": "tsx create-data-d-ts.ts"
+    "create-data-d-ts": "node create-data-d-ts.js",
+    "prepublish": "tsc"
   },
   "keywords": [],
   "author": "tigeryu8900",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "dotenv": "^16.4.5",
     "mime-types": "^2.1.35",
     "puppeteer": "^23.6.1",
-    "tsx": "^4.19.2",
     "undici": "^6.20.1"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
-    "json-schema-to-typescript": "^15.0.2"
-  }
+    "@types/node": "^22.8.4",
+    "json-schema-to-typescript": "^15.0.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "bin": {
+    "reddit": "bin"
+  },
+  "bugs": {
+    "url": "https://github.com/tigeryu8900/reddit-scheduler/issues"
+  },
+  "homepage": "https://github.com/tigeryu8900/reddit-scheduler#readme"
 }

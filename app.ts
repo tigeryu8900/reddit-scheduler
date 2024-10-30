@@ -1,16 +1,16 @@
 import puppeteer, {Browser, ElementHandle} from "puppeteer";
 import "dotenv/config";
 
-import {createWriteStream} from "fs";
-import * as fs from "fs/promises";
+import {createWriteStream} from "node:fs";
+import * as fs from "node:fs/promises";
 import * as path from "path";
 import * as os from "os";
-import Logger from "./logger.ts";
+import Logger from "./logger.js";
 import * as crypto from "crypto";
 import {Readable} from "stream";
 import {finished} from "stream/promises";
 import {fetch} from "undici";
-import {Data} from "./data.ts";
+import {Data} from "./data.js";
 
 const ctxDir: string = path.join(os.homedir(), ".reddit");
 const pidDir: string = path.join(ctxDir, "pid");

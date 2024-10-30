@@ -4,7 +4,8 @@ A Reddit scheduler for posts
 
 ## Set up
 
-Create a `.env` file in the project root directory in this format where `username` and `password` are the Reddit
+Create a `.env` file in the project root directory in this format where `username` and `password`
+are the Reddit
 credentials. The `HEADLESS` variable, which is passed into Puppeteer, defaults to `new` if missing.
 
 ```dotenv
@@ -15,9 +16,12 @@ HEADLESS=new
 
 Then, create the `~/.reddit/pending/` directory.
 
-Now, for each scheduled post, create a folder containing a string in the format `YYYY-mm-dd HH-MM-SS` in
-`~/.reddit/pending/` where the folder name corresponds to the scheduled time. The folder name can include extra
-characters as identification such as `2024-01-28 11-23-00 an interesting post`, which are ignored by the script.
+Now, for each scheduled post, create a folder containing a string in the format
+`YYYY-mm-dd HH-MM-SS` in
+`~/.reddit/pending/` where the folder name corresponds to the scheduled time. The folder name can
+include extra
+characters as identification such as `2024-01-28 11-23-00 an interesting post`, which are ignored by
+the script.
 
 Create a JSON file at `~/.reddit/pending/YYYY-mm-dd HH-MM-SS/data.json` with these fields:
 
@@ -33,7 +37,8 @@ Create a JSON file at `~/.reddit/pending/YYYY-mm-dd HH-MM-SS/data.json` with the
 | `.comments`   | An array of comments to add as strings, or `null` for no comments. Defaults to no comments.                              |
 | `.maxRetries` | The maximum number of retries. Defaults to `0`.                                                                          |
 
-You can also refer to the [`data.schema.json`](https://github.com/tigeryu8900/reddit-scheduler/blob/main/data.schema.json)
+You can also refer to the [
+`data.schema.json`](https://github.com/tigeryu8900/reddit-scheduler/blob/main/data.schema.json)
 schema file.
 
 Here's an example `data.json`. `1.png` and `2.png` are in the same directory as `data.json`.
@@ -84,7 +89,8 @@ For image posts, the `.type` field should be `image`. Additionally, there are th
 
 ### Gallery posts
 
-For gallery posts, the `.type` field should be `gallery` or `images`. Additionally, there are these fields:
+For gallery posts, the `.type` field should be `gallery` or `images`. Additionally, there are these
+fields:
 
 | fields               | description                                                                |
 |----------------------|----------------------------------------------------------------------------|
@@ -97,11 +103,11 @@ For gallery posts, the `.type` field should be `gallery` or `images`. Additional
 
 For video posts, the `.type` field should be `video`. Additionally, there are these fields:
 
-| fields            | description                                                                                    |
-|-------------------|------------------------------------------------------------------------------------------------|
-| `.file`           | The path to the file of the video relative to the JSON file.                                   |
-| `.thumbnail`      | An integer from 1 to 10 inclusive indicating the thumbnail to choose. Defaults to first image. |
-| `.gif`            | Whether or not to convert video to GIF. Defaults to `false`.                                   |
+| fields       | description                                                                                    |
+|--------------|------------------------------------------------------------------------------------------------|
+| `.file`      | The path to the file of the video relative to the JSON file.                                   |
+| `.thumbnail` | An integer from 1 to 10 inclusive indicating the thumbnail to choose. Defaults to first image. |
+| `.gif`       | Whether or not to convert video to GIF. Defaults to `false`.                                   |
 
 ### Link posts
 
@@ -136,7 +142,8 @@ If an instance is already running, that instance will be stopped.
 
 New folders added to `~/.reddit/pending/` are automatically scheduled.
 
-After the post is made, its folder will be moved to `~/.reddit/done/`, or if it failed, its folder will be moved to
+After the post is made, its folder will be moved to `~/.reddit/done/`, or if it failed, its folder
+will be moved to
 `~/.reddit/failed/`.
 
 ### Running at startup
@@ -146,7 +153,8 @@ It may be useful to run this script at startup.
 #### Windows
 
 [Create a task in Task Scheduler](https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10)
-to run at log in with `npm` as the program and `start prefix=/path/to/reddit-scheduler` where `/path/to/reddit-scheduler`
+to run at log in with `npm` as the program and `start prefix=/path/to/reddit-scheduler` where
+`/path/to/reddit-scheduler`
 is the path to the project root as the arguments.
 
 #### macOS
@@ -155,7 +163,8 @@ Go to `System Settings > General > Login Items`, and add the `run.sh` script to 
 
 #### Linux
 
-Create the file `~/.config/autostart/reddit-scheduler.desktop` with this content (remember to change the `Exec` path):
+Create the file `~/.config/autostart/reddit-scheduler.desktop` with this content (remember to change
+the `Exec` path):
 
 ```
 [Desktop Entry]
