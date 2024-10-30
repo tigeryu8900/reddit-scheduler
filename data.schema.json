@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/tigeryu8900/reddit-scheduler/main/data.schema.json",
-  "title": "Record of Employee",
-  "description": "This document records the details of an employee",
+  "title": "Data",
+  "description": "This document records the details of a scheduled post",
   "type": "object",
   "properties": {
     "subreddit": {
@@ -42,11 +42,17 @@
           },
           "caption": {
             "description": "The caption of the image or `null` for no caption. Defaults to no caption.",
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "link": {
             "description": "The link of the image or `null` for no link. Defaults to no link.",
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [

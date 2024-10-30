@@ -9,7 +9,7 @@
               <option name="generatedName" value="New Schema" />
               <option name="name" value="reddit-scheduler data" />
               <option name="relativePathToSchema" value="data.schema.json" />
-              <option name="schemaVersion" value="JSON Schema version 7" />
+              <option name="schemaVersion" value="JSON Schema 2020-12" />
               <option name="patterns">
                 <list>
                   <Item>

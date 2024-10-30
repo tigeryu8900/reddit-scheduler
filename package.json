@@ -2,7 +2,7 @@
   "name": "reddit-scheduler",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "app.ts",
   "type": "module",
   "repository": {
     "type": "git",
@@ -10,14 +10,15 @@
   },
   "scripts": {
     "start": "npm run start:bg",
-    "start:fg": "node app.js",
-    "start:bg": "nohup node app.js &",
+    "start:fg": "tsx app.ts",
+    "start:bg": "nohup tsx app.ts &",
     "stop": "kill $(cat ~/.reddit/pid)",
     "restart": "npm start",
     "restart:fg": "npm start:fg",
     "restart:bg": "npm start:bg",
     "schedule": "node schedule.js",
-    "reschedule": "touch ~/.reddit/pending/reschedule"
+    "reschedule": "touch ~/.reddit/pending/reschedule",
+    "create-data-d-ts": "tsx create-data-d-ts.ts"
   },
   "keywords": [],
   "author": "tigeryu8900",
@@ -25,6 +26,12 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "mime-types": "^2.1.35",
-    "puppeteer": "^22.11.0"
+    "puppeteer": "^23.6.1",
+    "tsx": "^4.19.2",
+    "undici": "^6.20.1"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.0",
+    "json-schema-to-typescript": "^15.0.2"
   }
 }

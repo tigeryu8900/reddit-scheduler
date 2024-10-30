@@ -1,36 +1,41 @@
-import puppeteer from "puppeteer";
+import puppeteer, {Browser, ElementHandle} from "puppeteer";
 import "dotenv/config";
 
 import {createWriteStream} from "fs";
-import fs from "fs/promises";
+import * as fs from "fs/promises";
 import * as path from "path";
-import os from "os";
-import Logger from "./logger.js";
-import crypto from "crypto";
+import * as os from "os";
+import Logger from "./logger.ts";
+import * as crypto from "crypto";
 import {Readable} from "stream";
 import {finished} from "stream/promises";
-import {ReadableStream} from "stream/web";
+import {fetch} from "undici";
+import {Data} from "@/data.js";
 
-const ctxDir = path.join(os.homedir(), ".reddit");
-const pidDir = path.join(ctxDir, "pid");
-const userDataDir = path.join(ctxDir, "User Data");
-const pendingDir = path.join(ctxDir, "pending");
-const failedDir = path.join(ctxDir, "failed");
-const doneDir = path.join(ctxDir, "done");
-const scheduled = {};
-const running = new Set();
+const ctxDir: string = path.join(os.homedir(), ".reddit");
+const pidDir: string = path.join(ctxDir, "pid");
+const userDataDir: string = path.join(ctxDir, "User Data");
+const pendingDir: string = path.join(ctxDir, "pending");
+const failedDir: string = path.join(ctxDir, "failed");
+const doneDir: string = path.join(ctxDir, "done");
+const scheduled: Record<string, { abort: () => void }> = {};
+const running: Set<String> = new Set();
 
-function scheduleFunction(handler, time, ...args) {
-  let interval = null;
-  let timeout = null;
+function scheduleFunction<TArgs extends any[]>(handler: (...args: TArgs) => any, time: number, ...args: TArgs): {
+  abort: () => void
+} {
+  let interval: NodeJS.Timeout | null = null;
+  let timeout: NodeJS.Timeout | null = null;
   if (time - Date.now() < 2147483647) {
-    timeout = setTimeout(handler, time - Date.now(), ...args);
+    timeout = setTimeout<TArgs>(handler, time - Date.now(), ...args);
   } else {
     interval = setInterval(() => {
       if (time - Date.now() < 2147483647) {
-        clearInterval(interval);
-        interval = null;
-        timeout = setTimeout(handler, time - Date.now(), ...args);
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+        timeout = setTimeout<TArgs>(handler, time - Date.now(), ...args);
       }
     }, 2147483647);
   }
@@ -46,21 +51,29 @@ function scheduleFunction(handler, time, ...args) {
   };
 }
 
-async function uploadFile(page, elementHandle, dir, file, tempFiles) {
+async function uploadFile(elementHandle: ElementHandle, dir: string, file: string, tempFiles: string[]): Promise<void> {
   if (/^https?:\/\//.test(file)) {
     const res = await fetch(file);
-    const tempfile = path.join(os.tmpdir(), `${crypto.randomUUID()}.png`);
-    const fileStream = createWriteStream(tempfile);
-    await finished(
-        Readable.fromWeb(ReadableStream.from(res.body)).pipe(fileStream));
-    await elementHandle.uploadFile(tempfile);
-    tempFiles.append(tempfile);
+    const tempFile = path.join(os.tmpdir(), `${crypto.randomUUID()}.png`);
+    const fileStream = createWriteStream(tempFile);
+    if (res.body) {
+      await finished(
+          Readable.fromWeb(res.body).pipe(fileStream));
+      await elementHandle.uploadFile(tempFile);
+      tempFiles.push(tempFile);
+    }
   } else {
     await elementHandle.uploadFile(path.resolve(pendingDir, dir, file));
   }
 }
 
-async function retry(iterations, try_fn = () => {}, catch_fn = () => {}, finally_fn = () => {}) {
+async function retry(iterations: number,
+                     try_fn: () => any = () => {
+                     },
+                     catch_fn: (e: any) => any = () => {
+                     },
+                     finally_fn: () => any = () => {
+                     }): Promise<void> {
   for (let i = 0; i < iterations; i++) {
     try {
       await try_fn();
@@ -74,13 +87,13 @@ async function retry(iterations, try_fn = () => {}, catch_fn = () => {}, finally
   throw new Error("Retry failed");
 }
 
-async function post(browser, dir) {
+async function post(browser: Browser, dir: string): Promise<void> {
   const logger = new Logger(path.join(pendingDir, dir, "output.log"), dir);
   logger.log("Starting");
   running.add(dir);
-  const data = JSON.parse(
+  const data: Data = JSON.parse(
       (await fs.readFile(path.join(pendingDir, dir, "data.json"))).toString());
-  const tempFiles = [];
+  const tempFiles: string[] = [];
   const old = !data.images && !data.gif;
   logger.log("Opening page");
   const page = await browser.newPage();
@@ -88,7 +101,7 @@ async function post(browser, dir) {
       (await browser.userAgent()).replace(/headless/gi, ""));
   const iterations = (data.maxRetries ?? 0) + 1;
   try {
-    let createdURL = null;
+    let createdURL = "";
     await retry(iterations, async () => {
       logger.log("Creating post");
       if (old) {
@@ -107,9 +120,10 @@ async function post(browser, dir) {
             break;
           case "image": {
             logger.log("Adding image");
-            const elementHandle = await page.$('#image');
-            await uploadFile(page, elementHandle, path.resolve(pendingDir, dir),
-                data.file, tempFiles);
+            const elementHandle = await page.locator('#image').waitHandle();
+            if (data.file) {
+              await uploadFile(elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
+            }
             await elementHandle.dispose();
             await page.waitForSelector('[name="submit"]:not([disabled])', {
               timeout: 30 * 1000
@@ -122,9 +136,11 @@ async function post(browser, dir) {
             break;
           case "video": {
             logger.log("Adding video");
-            const elementHandle = await page.$('#image');
-            await uploadFile(page, elementHandle, path.resolve(pendingDir, dir),
-                data.file, tempFiles);
+            const elementHandle = await page.locator('#image').waitHandle();
+            if (data.file) {
+              await uploadFile(elementHandle, path.resolve(pendingDir, dir),
+                  data.file, tempFiles);
+            }
             await elementHandle.dispose();
             let progress = "0%";
             while (progress !== "100%") {
@@ -151,7 +167,9 @@ async function post(browser, dir) {
           case "url":
           case "link": {
             logger.log("Adding url");
-            await page.locator('#url').fill(data.url);
+            if (data.url) {
+              await page.locator('#url').fill(data.url);
+            }
           }
             break;
         }
@@ -193,8 +211,10 @@ async function post(browser, dir) {
             logger.log("Adding image");
             let elementHandle = await page.locator(
                 '>>> input[type="file"][multiple="multiple"]').waitHandle();
-            await uploadFile(page, elementHandle, path.resolve(pendingDir, dir),
-                data.file, tempFiles);
+            if (data.file) {
+              await uploadFile(elementHandle, path.resolve(pendingDir, dir),
+                  data.file, tempFiles);
+            }
             await elementHandle.dispose();
           }
             break;
@@ -206,49 +226,51 @@ async function post(browser, dir) {
             await page.locator('>>> textarea[name="title"]').fill(data.title);
             logger.log("Adding images");
             let numImgs = 0;
-            for (let i = 0; i < data.images.length; i++) {
-              const image = data.images[i];
-              const elementHandle = await page.locator(
-                  '>>> input[type="file"][multiple="multiple"]').waitHandle();
-              for (let j = 0; numImgs <= i && j < 10; j++) {
-                await uploadFile(page, elementHandle,
-                    path.resolve(pendingDir, dir), image.file, tempFiles);
-                const time = Date.now();
-                while (numImgs <= i && Date.now() - time < 10000) {
-                  numImgs = await page.$$eval(
-                      '>>> faceplate-carousel ul li img.opacity-30',
-                      imgs => imgs.reduce(
-                          (acc, img) => img.src.startsWith("blob:") ? acc.add(
-                              img.src) : acc, new Set()).size);
+            if (data.images) {
+              for (let i = 0; i < data.images.length; i++) {
+                const image = data.images[i];
+                const elementHandle = await page.locator(
+                    '>>> input[type="file"][multiple="multiple"]').waitHandle();
+                for (let j = 0; numImgs <= i && j < 10; j++) {
+                  await uploadFile(elementHandle,
+                      path.resolve(pendingDir, dir), image.file, tempFiles);
+                  const time = Date.now();
+                  while (numImgs <= i && Date.now() - time < 10000) {
+                    numImgs = await page.$$eval(
+                        '>>> faceplate-carousel ul li img.opacity-30',
+                        imgs => imgs.reduce(
+                            (acc, img) => img.src.startsWith("blob:") ? acc.add(
+                                img.src) : acc, new Set()).size);
+                  }
                 }
+                await elementHandle.dispose();
               }
-              await elementHandle.dispose();
             }
-            if (numImgs < data.images.length) {
+            if (data.images && numImgs < data.images.length) {
               logger.error("Not enough images", data);
               return;
             }
             await page.locator('>>> button.edit-media').click();
-            if (data.images.some(({caption, link}) => caption || link)) {
-              await page.locator(
-                  `>>> .image-container:first-child button.btn-edit`).setTimeout(
-                  10000).click();
-              for (let i = 0; i < data.images.length; ++i) {
-                if (data.images[i].caption) {
-                  await new Promise(resolve => setTimeout(resolve, 500));
-                  await page.locator('>>> textarea[name="caption"]').fill(
-                      data.images[i].caption);
+            if (data.images) {
+              if (data.imagges && data.images.some(({caption, link}) => caption || link)) {
+                await page.locator(
+                    `>>> .image-container:first-child button.btn-edit`).setTimeout(
+                    10000).click();
+                for (const image of data.images) {
+                  if (image.caption) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await page.locator('>>> textarea[name="caption"]').fill(image.caption);
+                  }
+                  if (image.link) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await page.locator('>>> textarea[name="outboundUrl"]').fill(image.link);
+                  }
+                  await page.locator('>>> #media-carousel-next').click();
                 }
-                if (data.images[i].link) {
-                  await new Promise(resolve => setTimeout(resolve, 500));
-                  await page.locator('>>> textarea[name="outboundUrl"]').fill(
-                      data.images[i].link);
-                }
-                await page.locator('>>> #media-carousel-next').click();
+                await page.locator('>>> #edit-gallery-modal-save').click();
+                await page.locator(
+                    '#post-composer_media >>>> edit-gallery-modal >>>> #edit-gallery-internal-modal [slot="footer"] button.button-primary').click();
               }
-              await page.locator('>>> #edit-gallery-modal-save').click();
-              await page.locator(
-                  '#post-composer_media >>>> edit-gallery-modal >>>> #edit-gallery-internal-modal [slot="footer"] button.button-primary').click();
             }
           }
             break;
@@ -260,8 +282,10 @@ async function post(browser, dir) {
             logger.log("Adding video");
             let elementHandle = await page.locator(
                 '>>> input[type="file"][multiple="multiple"]').waitHandle();
-            await uploadFile(page, elementHandle, path.resolve(pendingDir, dir),
-                data.file, tempFiles);
+            if (data.file) {
+              await uploadFile(elementHandle, path.resolve(pendingDir, dir),
+                  data.file, tempFiles);
+            }
             await elementHandle.dispose();
             await page.waitForSelector('>>> button.edit-media', {
               timeout: 5 * 60 * 1000
@@ -290,14 +314,16 @@ async function post(browser, dir) {
             logger.log("Adding title");
             await page.locator('>>> textarea[name="title"]').fill(data.title);
             logger.log("Adding url");
-            await page.locator('>>> textarea[name="link"]').fill(data.url);
+            if (data.url) {
+              await page.locator('>>> textarea[name="link"]').fill(data.url);
+            }
           }
             break;
         }
         if (data.flair) {
           logger.log("Setting flair");
           await page.locator('>>> #reddit-post-flair-button').click();
-          let allFlairs = page.$('>>> #view-all-flairs-button');
+          let allFlairs = await page.$('>>> #view-all-flairs-button');
           if (allFlairs) {
             await allFlairs.click();
           }
@@ -379,7 +405,7 @@ async function post(browser, dir) {
   }
 }
 
-function schedule(browser, dir, retry = false) {
+function schedule(browser: Browser, dir: string, retry = false): void {
   try {
     const time = Date.parse(dir.replace(
         /^.*?(?<!\d)(\d{4})-(\d{1,2})-(\d{1,2}) (\d{1,2})-(\d{1,2})-(\d{1,2})(?!\d).*$/,
@@ -396,7 +422,7 @@ function schedule(browser, dir, retry = false) {
   }
 }
 
-async function scheduleAll(browser, retry = false) {
+async function scheduleAll(browser: Browser, retry = false): Promise<void> {
   for (let dir of await fs.readdir(pendingDir)) {
     try {
       if (!dir.startsWith(".")) {
@@ -408,29 +434,29 @@ async function scheduleAll(browser, retry = false) {
   }
 }
 
-async function exit(signal) {
+async function exit(this: Browser, signal: any): Promise<void> {
   console.log(process.pid, signal, "received, quitting");
   await this.close();
   await fs.rm(pidDir);
   process.exit();
 }
 
-(async () => {
-  await fs.mkdir(ctxDir, {recursive: true}).catch(() => {
+(async (): Promise<void> => {
+  await fs.mkdir(ctxDir, {recursive: true}).catch((): void => {
   });
-  await fs.access(pidDir).then(async () => {
+  await fs.access(pidDir).then(async (): Promise<void> => {
     process.kill(parseInt((await fs.readFile(pidDir)).toString()));
     console.log(process.pid,
         "Another instance is running, stopping that instance");
-    await new Promise(async resolve => {
-      while (await fs.access(pidDir).then(() => true, () => {
+    await new Promise(async (resolve: (value: void) => void): Promise<void> => {
+      while (await fs.access(pidDir).then((): boolean => true, (): boolean => {
         resolve();
         return false;
       })) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve: (value: void) => void): NodeJS.Timeout => setTimeout(resolve, 1000));
       }
     });
-  }, () => {
+  }, (): void => {
   }).catch(() => {
     console.log(process.pid,
         "Previous instance crashed. You should check the logs.");
@@ -442,17 +468,7 @@ async function exit(signal) {
   await fs.mkdir(failedDir, {recursive: true}).catch();
   await fs.mkdir(doneDir, {recursive: true}).catch();
   const browser = await puppeteer.launch({
-    headless: new Proxy({
-      1: true,
-      0: false,
-      true: true,
-      false: false,
-      undefined: "new"
-    }, {
-      get(obj, prop) {
-        return (prop in obj) ? obj[prop] : prop;
-      }
-    })[process.env.HEADLESS],
+    headless: process.env.HEADLESS === "shell" ? "shell" : !["0", "false"].includes(process.env.HEADLESS ?? ""),
     pipe: true,
     userDataDir
   });
@@ -482,7 +498,7 @@ async function exit(signal) {
     case null:
       console.log("Signing in");
       await page.goto("https://www.reddit.com/login/");
-      await page.locator('input[name="username"]').fill(process.env.USERNAME);
+      await page.locator('input[name="username"]').fill(process.env.USERNAME ?? "");
       await Promise.all([
         page.waitForNavigation(),
         page.locator('input[name="password"]').fill(
@@ -494,7 +510,7 @@ async function exit(signal) {
   await scheduleAll(browser);
   for await (let event of fs.watch(pendingDir)) {
     try {
-      if (!event.filename.startsWith(".")) {
+      if (event.filename && !event.filename.startsWith(".")) {
         const filepath = path.join(pendingDir, event.filename);
         if (event.filename === "reschedule") {
           if (await new Promise(resolve => fs.access(filepath)
