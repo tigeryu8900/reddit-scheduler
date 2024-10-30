@@ -10,7 +10,7 @@ import * as crypto from "crypto";
 import {Readable} from "stream";
 import {finished} from "stream/promises";
 import {fetch} from "undici";
-import {Data} from "@/data.js";
+import {Data} from "./data.ts";
 
 const ctxDir: string = path.join(os.homedir(), ".reddit");
 const pidDir: string = path.join(ctxDir, "pid");
