@@ -24,7 +24,10 @@ const doneDir: string = path.join(ctxDir, "done");
 const scheduled: Record<string, Timeout> = {};
 const running: Set<String> = new Set();
 
-async function uploadFile(elementHandle: ElementHandle, dir: string, file: string, tempFiles: string[]): Promise<void> {
+async function uploadFile(elementHandle: ElementHandle<HTMLInputElement>,
+                          dir: string,
+                          file: string,
+                          tempFiles: string[]): Promise<void> {
   if (/^https?:\/\//.test(file)) {
     const res = await fetch(file);
     const tempFile = path.join(os.tmpdir(), `${crypto.randomUUID()}.png`);
@@ -93,7 +96,7 @@ async function post(browser: Browser, dir: string): Promise<void> {
             break;
           case "image": {
             logger.log("Adding image");
-            const elementHandle = await page.locator('#image').waitHandle();
+            const elementHandle = await page.locator('input#image').waitHandle();
             if (data.file) {
               await uploadFile(elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
             }
@@ -109,7 +112,7 @@ async function post(browser: Browser, dir: string): Promise<void> {
             break;
           case "video": {
             logger.log("Adding video");
-            const elementHandle = await page.locator('#image').waitHandle();
+            const elementHandle = await page.locator('input#image').waitHandle();
             if (data.file) {
               await uploadFile(elementHandle, path.resolve(pendingDir, dir),
                   data.file, tempFiles);
@@ -117,12 +120,10 @@ async function post(browser: Browser, dir: string): Promise<void> {
             await elementHandle.dispose();
             let progress = "0%";
             while (progress !== "100%") {
-              await page.waitForSelector(
-                  `#media-progress-bar:not([style*="width: ${progress};"])`);
               progress = await page.evaluate(
-                  element => element ? element.style.width : progress,
-                  await page.$(
-                      `#media-progress-bar:not([style*="width: ${progress};"])`),
+                  element => element.style.width,
+                  await page.locator(
+                      `div#media-progress-bar:not([style*="width: ${progress};"])`).waitHandle(),
                   progress
               );
               logger.log(`Upload progress: ${progress}`);
@@ -225,7 +226,7 @@ async function post(browser: Browser, dir: string): Promise<void> {
             }
             await page.locator('>>> button.edit-media').click();
             if (data.images) {
-              if (data.imagges && data.images.some(({caption, link}) => caption || link)) {
+              if (data.images && data.images.some(({caption, link}) => caption || link)) {
                 await page.locator(
                     `>>> .image-container:first-child button.btn-edit`).setTimeout(
                     10000).click();
@@ -260,11 +261,8 @@ async function post(browser: Browser, dir: string): Promise<void> {
                   data.file, tempFiles);
             }
             await elementHandle.dispose();
-            await page.waitForSelector('>>> button.edit-media', {
-              timeout: 5 * 60 * 1000
-            });
             if (data.thumbnail || data.gif) {
-              await page.locator('>>> button.edit-media').click();
+              await page.locator('>>> button.edit-media').setTimeout(5 * 60 * 1000).click();
               await scheduler.delay(1000);
               if (data.thumbnail) {
                 logger.log("Choosing thumbnail");
@@ -304,7 +302,7 @@ async function post(browser: Browser, dir: string): Promise<void> {
               '>>> [aria-label="Post Flair Selection form"] [name="flairId"] >>> span',
               async (elements, flair) => {
                 console.log(elements, flair);
-                elements.find(element => element.innerText === flair).click();
+                elements.find(element => element.innerText === flair)?.click();
               }, data.flair);
           await page.locator('>>> button.apply').click();
         }

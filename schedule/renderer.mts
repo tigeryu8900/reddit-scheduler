@@ -490,10 +490,10 @@ $(function () {
           }
           return image;
         }))).filter(image => image.file);
-        if (images.length < 2) {
+        if (imageArray.length < 2) {
           await reject("Not enough images.");
         }
-        if (images.length > 20) {
+        if (imageArray.length > 20) {
           await reject("Too many images.");
         }
         data.images = [

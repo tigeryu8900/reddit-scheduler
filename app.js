@@ -85,7 +85,7 @@ async function post(browser, dir) {
                     case "image":
                         {
                             logger.log("Adding image");
-                            const elementHandle = await page.locator('#image').waitHandle();
+                            const elementHandle = await page.locator('input#image').waitHandle();
                             if (data.file) {
                                 await uploadFile(elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
                             }
@@ -102,15 +102,14 @@ async function post(browser, dir) {
                     case "video":
                         {
                             logger.log("Adding video");
-                            const elementHandle = await page.locator('#image').waitHandle();
+                            const elementHandle = await page.locator('input#image').waitHandle();
                             if (data.file) {
                                 await uploadFile(elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
                             }
                             await elementHandle.dispose();
                             let progress = "0%";
                             while (progress !== "100%") {
-                                await page.waitForSelector(`#media-progress-bar:not([style*="width: ${progress};"])`);
-                                progress = await page.evaluate(element => element ? element.style.width : progress, await page.$(`#media-progress-bar:not([style*="width: ${progress};"])`), progress);
+                                progress = await page.evaluate(element => element.style.width, await page.locator(`div#media-progress-bar:not([style*="width: ${progress};"])`).waitHandle(), progress);
                                 logger.log(`Upload progress: ${progress}`);
                             }
                             await page.waitForSelector('[name="submit"]:not([disabled])');
@@ -200,7 +199,7 @@ async function post(browser, dir) {
                             }
                             await page.locator('>>> button.edit-media').click();
                             if (data.images) {
-                                if (data.imagges && data.images.some(({ caption, link }) => caption || link)) {
+                                if (data.images && data.images.some(({ caption, link }) => caption || link)) {
                                     await page.locator(`>>> .image-container:first-child button.btn-edit`).setTimeout(10000).click();
                                     for (const image of data.images) {
                                         if (image.caption) {
@@ -230,11 +229,8 @@ async function post(browser, dir) {
                                 await uploadFile(elementHandle, path.resolve(pendingDir, dir), data.file, tempFiles);
                             }
                             await elementHandle.dispose();
-                            await page.waitForSelector('>>> button.edit-media', {
-                                timeout: 5 * 60 * 1000
-                            });
                             if (data.thumbnail || data.gif) {
-                                await page.locator('>>> button.edit-media').click();
+                                await page.locator('>>> button.edit-media').setTimeout(5 * 60 * 1000).click();
                                 await scheduler.delay(1000);
                                 if (data.thumbnail) {
                                     logger.log("Choosing thumbnail");
@@ -269,7 +265,7 @@ async function post(browser, dir) {
                     }
                     await page.$$eval('>>> [aria-label="Post Flair Selection form"] [name="flairId"] >>> span', async (elements, flair) => {
                         console.log(elements, flair);
-                        elements.find(element => element.innerText === flair).click();
+                        elements.find(element => element.innerText === flair)?.click();
                     }, data.flair);
                     await page.locator('>>> button.apply').click();
                 }
