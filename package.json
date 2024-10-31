@@ -1,6 +1,6 @@
 {
   "name": "reddit-scheduler",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A Reddit scheduler for posts",
   "main": "./bin",
   "type": "module",
@@ -16,25 +16,35 @@
     "restart": "npm start",
     "restart:fg": "npm start:fg",
     "restart:bg": "npm start:bg",
-    "schedule": "node schedule.js",
+    "schedule": "electron schedule/main.js",
     "reschedule": "touch ~/.reddit/pending/reschedule",
     "create-data-d-ts": "node create-data-d-ts.js",
     "watch": "tsc --watch",
     "build": "tsc"
   },
-  "keywords": [],
+  "keywords": [
+    "reddit",
+    "schedule"
+  ],
   "author": "tigeryu8900",
   "license": "MIT",
   "dependencies": {
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3",
     "dotenv": "^16.4.5",
+    "electron": "^33.0.2",
     "extended-timeout": "^1.0.1",
+    "jquery": "^3.7.1",
     "mime-types": "^2.1.35",
     "puppeteer": "^23.6.1",
     "undici": "^6.20.1"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
+    "@types/bootstrap": "^5.2.10",
+    "@types/jquery": "^3.5.32",
     "@types/node": "^22.8.4",
+    "@types/web": "^0.0.175",
     "json-schema-to-typescript": "^15.0.2",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
