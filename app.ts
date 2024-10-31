@@ -11,6 +11,9 @@ import {Readable} from "stream";
 import {finished} from "stream/promises";
 import {fetch} from "undici";
 import {Data} from "./data.js";
+import Timeout from "extended-timeout/timeout.js";
+import {clearTimeout, setTimeout} from "extended-timeout";
+import {scheduler} from "extended-timeout/promises.js";
 
 const ctxDir: string = path.join(os.homedir(), ".reddit");
 const pidDir: string = path.join(ctxDir, "pid");
@@ -18,38 +21,8 @@ const userDataDir: string = path.join(ctxDir, "User Data");
 const pendingDir: string = path.join(ctxDir, "pending");
 const failedDir: string = path.join(ctxDir, "failed");
 const doneDir: string = path.join(ctxDir, "done");
-const scheduled: Record<string, { abort: () => void }> = {};
+const scheduled: Record<string, Timeout> = {};
 const running: Set<String> = new Set();
-
-function scheduleFunction<TArgs extends any[]>(handler: (...args: TArgs) => any, time: number, ...args: TArgs): {
-  abort: () => void
-} {
-  let interval: NodeJS.Timeout | null = null;
-  let timeout: NodeJS.Timeout | null = null;
-  if (time - Date.now() < 2147483647) {
-    timeout = setTimeout<TArgs>(handler, time - Date.now(), ...args);
-  } else {
-    interval = setInterval(() => {
-      if (time - Date.now() < 2147483647) {
-        if (interval) {
-          clearInterval(interval);
-          interval = null;
-        }
-        timeout = setTimeout<TArgs>(handler, time - Date.now(), ...args);
-      }
-    }, 2147483647);
-  }
-  return {
-    abort() {
-      if (interval) {
-        clearInterval(interval);
-      }
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-    }
-  };
-}
 
 async function uploadFile(elementHandle: ElementHandle, dir: string, file: string, tempFiles: string[]): Promise<void> {
   if (/^https?:\/\//.test(file)) {
@@ -258,11 +231,11 @@ async function post(browser: Browser, dir: string): Promise<void> {
                     10000).click();
                 for (const image of data.images) {
                   if (image.caption) {
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await scheduler.delay(500);
                     await page.locator('>>> textarea[name="caption"]').fill(image.caption);
                   }
                   if (image.link) {
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await scheduler.delay(500);
                     await page.locator('>>> textarea[name="outboundUrl"]').fill(image.link);
                   }
                   await page.locator('>>> #media-carousel-next').click();
@@ -292,7 +265,7 @@ async function post(browser: Browser, dir: string): Promise<void> {
             });
             if (data.thumbnail || data.gif) {
               await page.locator('>>> button.edit-media').click();
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              await scheduler.delay(1000);
               if (data.thumbnail) {
                 logger.log("Choosing thumbnail");
                 await page.locator(
@@ -382,7 +355,7 @@ async function post(browser: Browser, dir: string): Promise<void> {
         for (let comment of data.comments) {
           await page.locator('form.cloneable [name="text"]').fill(comment);
           await page.locator('form.cloneable [type="submit"]').click();
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          await scheduler.delay(5000);
         }
       }
       logger.log("Posted",
@@ -412,9 +385,9 @@ function schedule(browser: Browser, dir: string, retry = false): void {
         "$1-$2-$3T$4:$5:$6"));
     if ((retry || !scheduled.hasOwnProperty(dir)) && !running.has(dir)) {
       if (scheduled[dir]) {
-        scheduled[dir].abort();
+        clearTimeout(scheduled[dir]);
       }
-      scheduled[dir] = scheduleFunction(post, time, browser, dir);
+      scheduled[dir] = setTimeout(post, time - Date.now(), browser, dir);
       console.log(dir, "Scheduled");
     }
   } catch (e) {
@@ -453,7 +426,7 @@ async function exit(this: Browser, signal: any): Promise<void> {
         resolve();
         return false;
       })) {
-        await new Promise((resolve: (value: void) => void): NodeJS.Timeout => setTimeout(resolve, 1000));
+        await scheduler.delay(1000);
       }
     });
   }, (): void => {

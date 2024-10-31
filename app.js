@@ -9,6 +9,8 @@ import * as crypto from "crypto";
 import { Readable } from "stream";
 import { finished } from "stream/promises";
 import { fetch } from "undici";
+import { clearTimeout, setTimeout } from "extended-timeout";
+import { scheduler } from "extended-timeout/promises.js";
 const ctxDir = path.join(os.homedir(), ".reddit");
 const pidDir = path.join(ctxDir, "pid");
 const userDataDir = path.join(ctxDir, "User Data");
@@ -17,34 +19,6 @@ const failedDir = path.join(ctxDir, "failed");
 const doneDir = path.join(ctxDir, "done");
 const scheduled = {};
 const running = new Set();
-function scheduleFunction(handler, time, ...args) {
-    let interval = null;
-    let timeout = null;
-    if (time - Date.now() < 2147483647) {
-        timeout = setTimeout(handler, time - Date.now(), ...args);
-    }
-    else {
-        interval = setInterval(() => {
-            if (time - Date.now() < 2147483647) {
-                if (interval) {
-                    clearInterval(interval);
-                    interval = null;
-                }
-                timeout = setTimeout(handler, time - Date.now(), ...args);
-            }
-        }, 2147483647);
-    }
-    return {
-        abort() {
-            if (interval) {
-                clearInterval(interval);
-            }
-            if (timeout) {
-                clearTimeout(timeout);
-            }
-        }
-    };
-}
 async function uploadFile(elementHandle, dir, file, tempFiles) {
     if (/^https?:\/\//.test(file)) {
         const res = await fetch(file);
@@ -230,11 +204,11 @@ async function post(browser, dir) {
                                     await page.locator(`>>> .image-container:first-child button.btn-edit`).setTimeout(10000).click();
                                     for (const image of data.images) {
                                         if (image.caption) {
-                                            await new Promise(resolve => setTimeout(resolve, 500));
+                                            await scheduler.delay(500);
                                             await page.locator('>>> textarea[name="caption"]').fill(image.caption);
                                         }
                                         if (image.link) {
-                                            await new Promise(resolve => setTimeout(resolve, 500));
+                                            await scheduler.delay(500);
                                             await page.locator('>>> textarea[name="outboundUrl"]').fill(image.link);
                                         }
                                         await page.locator('>>> #media-carousel-next').click();
@@ -261,7 +235,7 @@ async function post(browser, dir) {
                             });
                             if (data.thumbnail || data.gif) {
                                 await page.locator('>>> button.edit-media').click();
-                                await new Promise(resolve => setTimeout(resolve, 1000));
+                                await scheduler.delay(1000);
                                 if (data.thumbnail) {
                                     logger.log("Choosing thumbnail");
                                     await page.locator(`>>> .thumbnail:nth-child(${data.thumbnail})`).click();
@@ -341,7 +315,7 @@ async function post(browser, dir) {
                 for (let comment of data.comments) {
                     await page.locator('form.cloneable [name="text"]').fill(comment);
                     await page.locator('form.cloneable [type="submit"]').click();
-                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    await scheduler.delay(5000);
                 }
             }
             logger.log("Posted", page.url().replace("old.reddit.com", "www.reddit.com"), data);
@@ -369,9 +343,9 @@ function schedule(browser, dir, retry = false) {
         const time = Date.parse(dir.replace(/^.*?(?<!\d)(\d{4})-(\d{1,2})-(\d{1,2}) (\d{1,2})-(\d{1,2})-(\d{1,2})(?!\d).*$/, "$1-$2-$3T$4:$5:$6"));
         if ((retry || !scheduled.hasOwnProperty(dir)) && !running.has(dir)) {
             if (scheduled[dir]) {
-                scheduled[dir].abort();
+                clearTimeout(scheduled[dir]);
             }
-            scheduled[dir] = scheduleFunction(post, time, browser, dir);
+            scheduled[dir] = setTimeout(post, time - Date.now(), browser, dir);
             console.log(dir, "Scheduled");
         }
     }
@@ -408,7 +382,7 @@ async function exit(signal) {
                 resolve();
                 return false;
             })) {
-                await new Promise((resolve) => setTimeout(resolve, 1000));
+                await scheduler.delay(1000);
             }
         });
     }, () => {

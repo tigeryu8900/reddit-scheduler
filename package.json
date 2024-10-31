@@ -1,8 +1,8 @@
 {
   "name": "reddit-scheduler",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Reddit scheduler for posts",
-  "main": "bin.js",
+  "main": "./bin",
   "type": "module",
   "repository": {
     "type": "git",
@@ -19,13 +19,15 @@
     "schedule": "node schedule.js",
     "reschedule": "touch ~/.reddit/pending/reschedule",
     "create-data-d-ts": "node create-data-d-ts.js",
-    "prepublish": "tsc"
+    "watch": "tsc --watch",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "tigeryu8900",
   "license": "MIT",
   "dependencies": {
     "dotenv": "^16.4.5",
+    "extended-timeout": "^1.0.1",
     "mime-types": "^2.1.35",
     "puppeteer": "^23.6.1",
     "undici": "^6.20.1"

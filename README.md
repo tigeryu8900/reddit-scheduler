@@ -6,12 +6,12 @@ A Reddit scheduler for posts
 
 Create a `.env` file in the project root directory in this format where `username` and `password`
 are the Reddit
-credentials. The `HEADLESS` variable, which is passed into Puppeteer, defaults to `new` if missing.
+credentials. The `HEADLESS` variable, which is passed into Puppeteer, defaults to `true` if missing.
 
 ```dotenv
 USERNAME=username
 PASSWORD=password
-HEADLESS=new
+HEADLESS=true
 ```
 
 Then, create the `~/.reddit/pending/` directory.
@@ -175,7 +175,8 @@ reddit reschedule
 ### Running at startup
 
 It may be useful to run this script at startup. Note that you may use `reddit` as the program name
-instead of `npm start prefix=/path/to/reddit-scheduler` if you used `npm install` to install this package.
+instead of `npm start prefix=/path/to/reddit-scheduler` if you used `npm install` to install this
+package.
 
 #### Windows
 
