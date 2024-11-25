@@ -1,6 +1,6 @@
 {
   "name": "reddit-scheduler",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A Reddit scheduler for posts",
   "main": "./bin",
   "type": "module",

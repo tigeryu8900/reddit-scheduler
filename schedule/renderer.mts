@@ -311,8 +311,11 @@ $(function () {
           e.preventDefault();
         }
       } else if (e.type === "paste") {
-        if (!target.is(
-                'input:not([type="file"]), textarea, div[contenteditable="plaintext-only"]')
+        if (!target.is([
+              'input:not([type="file"])',
+              'textarea',
+              '[contenteditable]:not([contenteditable="false"])'
+            ].join(", "))
             && itemsHandler(items)) {
           e.preventDefault();
         }
